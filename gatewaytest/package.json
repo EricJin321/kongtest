@@ -1,0 +1,17 @@
+{
+  "devDependencies": {
+    "cypress": "^15.7.1"
+  },
+  "scripts": {
+    "test": "cypress run",
+    "test:all": "TEST_SET=all cypress run",
+    "test:protocol-check": "TEST_SET=protocol-check cypress run",
+    "test:basic": "TEST_SET=basic cypress run",
+    "test:staging": "ENVIRONMENT=staging TEST_SET=all cypress run",
+    "test:prod": "ENVIRONMENT=production TEST_SET=all cypress run",
+    "test:timeout:10s": "TIMEOUT=10000 cypress run",
+    "cypress:open": "cypress open"
+  }
+}
+
+
