@@ -13,6 +13,7 @@ const getSpecPattern = () => {
     all: 'webapitest/tests/**/*.cy.js',
     'protocol-check': 'webapitest/tests/protocol-check.cy.js',
     basic: 'webapitest/tests/basic.cy.js',
+    comprehensive: 'webapitest/tests/comprehensive.cy.js',
   };
 
   return patterns[testSet] || patterns['all'];

@@ -186,7 +186,7 @@
   {
     "httpRequest": {
       "method": "PUT",
-      "path": "/testone/user/([0-9]+)",
+      "path": "/testone/user/{userId}",
       "pathParameters": {
         "userId": ["^[0-9]+$"]
       }
