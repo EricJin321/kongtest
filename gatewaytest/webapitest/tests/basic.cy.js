@@ -2,12 +2,12 @@ import ServiceWebApi from '../utils/servicewebapi';
 import { writeLog } from '../utils/logger.js';
 
 describe('Basic API Tests', function () {
+  const basicRoutePath = '/testbasic';
   // Minimal alias experiment moved into the original describe to keep the suite structure
   before(function () {
     // set alias for a known name
     writeLog('before: alias createdServiceName is going to set');
-    cy.wrap('BasicTestService').as('createdServiceName');
-    writeLog('before: alias createdServiceName set');
+    return cy.wrap('BasicTestService').as('createdServiceName');
   });
 
   after(function () {
@@ -23,7 +23,7 @@ describe('Basic API Tests', function () {
 
   it('HTTPS hello endpoint should return 200 with correct response', function () {
     writeLog('it: starting helloApi test');
-    ServiceWebApi.getHelloApi(false, 200, { msg: 'hello world' });
+    ServiceWebApi.getHelloApi(basicRoutePath, false, 200, { msg: 'hello world' });
     writeLog('it: finished helloApi test');
   });
 

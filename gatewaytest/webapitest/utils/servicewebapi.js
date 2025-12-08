@@ -6,18 +6,18 @@ import { getBaseUrl, buildUrl } from './configLoader';
  */
 class ServiceWebApi {
   /**
-   * GET /testone/hello - Basic hello endpoint
+  * GET /testbasic/hello - Basic hello endpoint
    * @param {boolean} isHttps - Whether to use HTTPS (default: false)
    * @param {number} expectedStatus - Expected HTTP status code (default: 200)
    * @param {object} expectedResponse - Expected response body
    * @returns {Cypress.Chainable} Response object
    */
-  static getHelloApi(isHttps = false, expectedStatus = 200, expectedResponse = null) {
+  static getHelloApi(routePath, isHttps = false, expectedStatus = 200, expectedResponse = null) {
     const protocol = isHttps ? 'https' : 'http';
     const environment = Cypress.env('ENVIRONMENT') || 'local';
     
     return getBaseUrl(environment, protocol).then((baseUrl) => {
-      const url = buildUrl(baseUrl, '/testone/hello');
+      const url = buildUrl(baseUrl, `${routePath}/mock/hello`);
       
       return apiRequest(url, isHttps).then((response) => {
         expect(response.status).to.eq(expectedStatus);
@@ -29,19 +29,19 @@ class ServiceWebApi {
   }
 
   /**
-   * GET /testone/resource - Get resource with caching support
+  * GET /testbasic/resource - Get resource with caching support
    * @param {boolean} isHttps - Whether to use HTTPS (default: false)
    * @param {string} ifModifiedSince - Optional If-Modified-Since header
    * @param {number} expectedStatus - Expected HTTP status code (default: 200)
    * @param {object} expectedResponse - Expected response body
    * @returns {Cypress.Chainable} Response object
    */
-  static getResourceApi(isHttps = false, ifModifiedSince = null, expectedStatus = 200, expectedResponse = null) {
+  static getResourceApi(routePath, isHttps = false, ifModifiedSince = null, expectedStatus = 200, expectedResponse = null) {
     const protocol = isHttps ? 'https' : 'http';
     const environment = Cypress.env('ENVIRONMENT') || 'local';
     
     return getBaseUrl(environment, protocol).then((baseUrl) => {
-      const url = buildUrl(baseUrl, '/testone/resource');
+      const url = buildUrl(baseUrl, `${routePath}/mock/resource`);
       const options = {};
       
       if (ifModifiedSince) {
@@ -59,19 +59,19 @@ class ServiceWebApi {
   }
 
   /**
-   * GET /testone/redirect - Test redirect behavior
+  * GET /testbasic/redirect - Test redirect behavior
    * @param {boolean} isHttps - Whether to use HTTPS (default: false)
    * @param {boolean} followRedirect - Whether to follow redirects (default: true)
    * @param {number} expectedStatus - Expected HTTP status code
    * @param {object} expectedResponse - Expected response body
    * @returns {Cypress.Chainable} Response object
    */
-  static getRedirectApi(isHttps = false, followRedirect = true, expectedStatus = 200, expectedResponse = null) {
+  static getRedirectApi(routePath, isHttps = false, followRedirect = true, expectedStatus = 200, expectedResponse = null) {
     const protocol = isHttps ? 'https' : 'http';
     const environment = Cypress.env('ENVIRONMENT') || 'local';
     
     return getBaseUrl(environment, protocol).then((baseUrl) => {
-      const url = buildUrl(baseUrl, '/testone/redirect');
+      const url = buildUrl(baseUrl, `${routePath}/mock/redirect`);
       const options = { followRedirect };
       
       return apiRequest(url, isHttps, options).then((response) => {
@@ -85,19 +85,19 @@ class ServiceWebApi {
   }
 
   /**
-   * GET /testone/private - Protected endpoint requiring authorization
+  * GET /testbasic/private - Protected endpoint requiring authorization
    * @param {boolean} isHttps - Whether to use HTTPS (default: false)
    * @param {string} token - Authorization token
    * @param {number} expectedStatus - Expected HTTP status code (default: 200)
    * @param {object} expectedResponse - Expected response body
    * @returns {Cypress.Chainable} Response object
    */
-  static getPrivateApi(isHttps = false, token = null, expectedStatus = 200, expectedResponse = null) {
+  static getPrivateApi(routePath, isHttps = false, token = null, expectedStatus = 200, expectedResponse = null) {
     const protocol = isHttps ? 'https' : 'http';
     const environment = Cypress.env('ENVIRONMENT') || 'local';
     
     return getBaseUrl(environment, protocol).then((baseUrl) => {
-      const url = buildUrl(baseUrl, '/testone/private');
+      const url = buildUrl(baseUrl, `${routePath}/mock/private`);
       const options = {};
       
       if (token) {
@@ -115,18 +115,18 @@ class ServiceWebApi {
   }
 
   /**
-   * GET /testone/forbidden - Forbidden resource endpoint
+  * GET /testbasic/forbidden - Forbidden resource endpoint
    * @param {boolean} isHttps - Whether to use HTTPS (default: false)
    * @param {number} expectedStatus - Expected HTTP status code (default: 403)
    * @param {object} expectedResponse - Expected response body
    * @returns {Cypress.Chainable} Response object
    */
-  static getForbiddenApi(isHttps = false, expectedStatus = 403, expectedResponse = null) {
+  static getForbiddenApi(routePath, isHttps = false, expectedStatus = 403, expectedResponse = null) {
     const protocol = isHttps ? 'https' : 'http';
     const environment = Cypress.env('ENVIRONMENT') || 'local';
     
     return getBaseUrl(environment, protocol).then((baseUrl) => {
-      const url = buildUrl(baseUrl, '/testone/forbidden');
+      const url = buildUrl(baseUrl, `${routePath}/mock/forbidden`);
       return apiRequest(url, isHttps).then((response) => {
         expect(response.status).to.eq(expectedStatus);
         if (expectedResponse !== null) {
@@ -138,18 +138,18 @@ class ServiceWebApi {
   }
 
   /**
-   * GET /testone/status/500 - Internal server error endpoint
+  * GET /testbasic/status/500 - Internal server error endpoint
    * @param {boolean} isHttps - Whether to use HTTPS (default: false)
    * @param {number} expectedStatus - Expected HTTP status code (default: 500)
    * @param {object} expectedResponse - Expected response body
    * @returns {Cypress.Chainable} Response object
    */
-  static getServerErrorApi(isHttps = false, expectedStatus = 500, expectedResponse = null) {
+  static getServerErrorApi(routePath, isHttps = false, expectedStatus = 500, expectedResponse = null) {
     const protocol = isHttps ? 'https' : 'http';
     const environment = Cypress.env('ENVIRONMENT') || 'local';
     
     return getBaseUrl(environment, protocol).then((baseUrl) => {
-      const url = buildUrl(baseUrl, '/testone/status/500');
+      const url = buildUrl(baseUrl, `${routePath}/mock/status/500`);
       return apiRequest(url, isHttps).then((response) => {
         expect(response.status).to.eq(expectedStatus);
         if (expectedResponse !== null) {
@@ -161,19 +161,19 @@ class ServiceWebApi {
   }
 
   /**
-   * POST /testone/items - Create new item
+  * POST /testbasic/items - Create new item
    * @param {boolean} isHttps - Whether to use HTTPS (default: false)
    * @param {object} body - Request body (default: empty object)
    * @param {number} expectedStatus - Expected HTTP status code (default: 201)
    * @param {object} expectedResponse - Expected response body
    * @returns {Cypress.Chainable} Response object
    */
-  static postItemApi(isHttps = false, body = {}, expectedStatus = 201, expectedResponse = null) {
+  static postItemApi(routePath, isHttps = false, body = {}, expectedStatus = 201, expectedResponse = null) {
     const protocol = isHttps ? 'https' : 'http';
     const environment = Cypress.env('ENVIRONMENT') || 'local';
     
     return getBaseUrl(environment, protocol).then((baseUrl) => {
-      const url = buildUrl(baseUrl, '/testone/items');
+      const url = buildUrl(baseUrl, `${routePath}/mock/items`);
       const options = { method: 'POST', body };
       
       return apiRequest(url, isHttps, options).then((response) => {
@@ -187,19 +187,19 @@ class ServiceWebApi {
   }
 
   /**
-   * PUT /testone/items/123 - Update item
+  * PUT /testbasic/items/123 - Update item
    * @param {boolean} isHttps - Whether to use HTTPS (default: false)
    * @param {string} itemId - Item ID (default: '123')
    * @param {number} expectedStatus - Expected HTTP status code (default: 204)
    * @param {object} expectedResponse - Expected response body
    * @returns {Cypress.Chainable} Response object
    */
-  static putItemApi(isHttps = false, itemId = '123', expectedStatus = 204, expectedResponse = null) {
+  static putItemApi(routePath, isHttps = false, itemId = '123', expectedStatus = 204, expectedResponse = null) {
     const protocol = isHttps ? 'https' : 'http';
     const environment = Cypress.env('ENVIRONMENT') || 'local';
     
     return getBaseUrl(environment, protocol).then((baseUrl) => {
-      const url = buildUrl(baseUrl, `/testone/items/${itemId}`);
+      const url = buildUrl(baseUrl, `${routePath}/mock/items/${itemId}`);
       const options = { method: 'PUT' };
       
       return apiRequest(url, isHttps, options).then((response) => {
@@ -213,19 +213,19 @@ class ServiceWebApi {
   }
 
   /**
-   * DELETE /testone/items/123 - Delete item
+  * DELETE /testbasic/items/123 - Delete item
    * @param {boolean} isHttps - Whether to use HTTPS (default: false)
    * @param {string} itemId - Item ID (default: '123')
    * @param {number} expectedStatus - Expected HTTP status code (default: 204)
    * @param {object} expectedResponse - Expected response body
    * @returns {Cypress.Chainable} Response object
    */
-  static deleteItemApi(isHttps = false, itemId = '123', expectedStatus = 204, expectedResponse = null) {
+  static deleteItemApi(routePath, isHttps = false, itemId = '123', expectedStatus = 204, expectedResponse = null) {
     const protocol = isHttps ? 'https' : 'http';
     const environment = Cypress.env('ENVIRONMENT') || 'local';
     
     return getBaseUrl(environment, protocol).then((baseUrl) => {
-      const url = buildUrl(baseUrl, `/testone/items/${itemId}`);
+      const url = buildUrl(baseUrl, `${routePath}/mock/items/${itemId}`);
       const options = { method: 'DELETE' };
       
       return apiRequest(url, isHttps, options).then((response) => {
@@ -239,19 +239,19 @@ class ServiceWebApi {
   }
 
   /**
-   * PUT /testone/user/:userId - Update user by ID
+  * PUT /testbasic/user/:userId - Update user by ID
    * @param {boolean} isHttps - Whether to use HTTPS (default: false)
    * @param {string} userId - User ID to update
    * @param {number} expectedStatus - Expected HTTP status code (default: 200)
    * @param {object} expectedResponse - Expected response body
    * @returns {Cypress.Chainable} Response object
    */
-  static putUserApi(isHttps = false, userId, expectedStatus = 200, expectedResponse = null) {
+  static putUserApi(routePath, isHttps = false, userId, expectedStatus = 200, expectedResponse = null) {
     const protocol = isHttps ? 'https' : 'http';
     const environment = Cypress.env('ENVIRONMENT') || 'local';
     
     return getBaseUrl(environment, protocol).then((baseUrl) => {
-      const url = buildUrl(baseUrl, `/testone/user/${userId}`);
+      const url = buildUrl(baseUrl, `${routePath}/mock/user/${userId}`);
       const options = { method: 'PUT' };
       
       return apiRequest(url, isHttps, options).then((response) => {
@@ -265,19 +265,19 @@ class ServiceWebApi {
   }
 
   /**
-   * POST /testone/echo - Echo endpoint that returns posted data
+  * POST /testbasic/echo - Echo endpoint that returns posted data
    * @param {boolean} isHttps - Whether to use HTTPS (default: false)
    * @param {string} data - Data to echo
    * @param {number} expectedStatus - Expected HTTP status code (default: 200)
    * @param {object} expectedResponse - Expected response body
    * @returns {Cypress.Chainable} Response object
    */
-  static postEchoApi(isHttps = false, data = '', expectedStatus = 200, expectedResponse = null) {
+  static postEchoApi(routePath, isHttps = false, data = '', expectedStatus = 200, expectedResponse = null) {
     const protocol = isHttps ? 'https' : 'http';
     const environment = Cypress.env('ENVIRONMENT') || 'local';
     
     return getBaseUrl(environment, protocol).then((baseUrl) => {
-      const url = buildUrl(baseUrl, '/testone/echo');
+      const url = buildUrl(baseUrl, `${routePath}/mock/echo`);
       const options = { method: 'POST', body: data };
       
       return apiRequest(url, isHttps, options).then((response) => {
@@ -291,18 +291,18 @@ class ServiceWebApi {
   }
 
   /**
-   * GET /testone/slow - Slow response endpoint (1.5 second delay)
+  * GET /testbasic/slow - Slow response endpoint (1.5 second delay)
    * @param {boolean} isHttps - Whether to use HTTPS (default: false)
    * @param {number} expectedStatus - Expected HTTP status code (default: 200)
    * @param {object} expectedResponse - Expected response body
    * @returns {Cypress.Chainable} Response object
    */
-  static getSlowApi(isHttps = false, expectedStatus = 200, expectedResponse = null) {
+  static getSlowApi(routePath, isHttps = false, expectedStatus = 200, expectedResponse = null) {
     const protocol = isHttps ? 'https' : 'http';
     const environment = Cypress.env('ENVIRONMENT') || 'local';
     
     return getBaseUrl(environment, protocol).then((baseUrl) => {
-      const url = buildUrl(baseUrl, '/testone/slow');
+      const url = buildUrl(baseUrl, `${routePath}/mock/slow`);
       return apiRequest(url, isHttps).then((response) => {
         expect(response.status).to.eq(expectedStatus);
         if (expectedResponse !== null) {
@@ -314,18 +314,18 @@ class ServiceWebApi {
   }
 
   /**
-   * GET /testone/bad-request - Bad request endpoint
+  * GET /testbasic/bad-request - Bad request endpoint
    * @param {boolean} isHttps - Whether to use HTTPS (default: false)
    * @param {number} expectedStatus - Expected HTTP status code (default: 400)
    * @param {object} expectedResponse - Expected response body
    * @returns {Cypress.Chainable} Response object
    */
-  static getBadRequestApi(isHttps = false, expectedStatus = 400, expectedResponse = null) {
+  static getBadRequestApi(routePath, isHttps = false, expectedStatus = 400, expectedResponse = null) {
     const protocol = isHttps ? 'https' : 'http';
     const environment = Cypress.env('ENVIRONMENT') || 'local';
     
     return getBaseUrl(environment, protocol).then((baseUrl) => {
-      const url = buildUrl(baseUrl, '/testone/bad-request');
+      const url = buildUrl(baseUrl, `${routePath}/mock/bad-request`);
       return apiRequest(url, isHttps).then((response) => {
         expect(response.status).to.eq(expectedStatus);
         if (expectedResponse !== null) {

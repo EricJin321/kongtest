@@ -2,7 +2,7 @@
   {
     "httpRequest": {
       "method": "GET",
-      "path": "/testone/hello"
+      "path": "/mock/hello"
     },
     "httpResponse": {
       "statusCode": 200,
@@ -16,7 +16,7 @@
   {
     "httpRequest": {
       "method": "GET",
-      "path": "/testone/resource",
+      "path": "/mock/resource",
       "headers": {
         "If-Modified-Since": [".+"]
       }
@@ -32,7 +32,7 @@
   {
     "httpRequest": {
       "method": "GET",
-      "path": "/testone/resource"
+      "path": "/mock/resource"
     },
     "httpResponse": {
       "statusCode": 200,
@@ -47,12 +47,12 @@
   {
     "httpRequest": {
       "method": "GET",
-      "path": "/testone/redirect"
+      "path": "/mock/redirect"
     },
     "httpResponse": {
       "statusCode": 302,
       "headers": {
-        "Location": ["/testone/new-location"]
+        "Location": ["/mock/new-location"]
       }
     }
   },
@@ -60,7 +60,7 @@
   {
     "httpRequest": {
       "method": "GET",
-      "path": "/testone/new-location"
+      "path": "/mock/new-location"
     },
     "httpResponse": {
       "statusCode": 200,
@@ -74,7 +74,7 @@
   {
     "httpRequest": {
       "method": "GET",
-      "path": "/testone/private",
+      "path": "/mock/private",
       "headers": {
         "Authorization": ["Bearer secret-token"]
       }
@@ -89,7 +89,7 @@
   {
     "httpRequest": {
       "method": "GET",
-      "path": "/testone/private"
+      "path": "/mock/private"
     },
     "httpResponse": {
       "statusCode": 401,
@@ -103,7 +103,7 @@
   {
     "httpRequest": {
       "method": "GET",
-      "path": "/testone/forbidden"
+      "path": "/mock/forbidden"
     },
     "httpResponse": {
       "statusCode": 403,
@@ -114,7 +114,7 @@
   {
     "httpRequest": {
       "method": "GET",
-      "path": "/testone/status/500"
+      "path": "/mock/status/500"
     },
     "httpResponse": {
       "statusCode": 500,
@@ -125,7 +125,7 @@
   {
     "httpRequest": {
       "method": "GET",
-      "path": "/testone/status/418"
+      "path": "/mock/status/418"
     },
     "httpResponse": {
       "statusCode": 418,
@@ -136,7 +136,7 @@
   {
     "httpRequest": {
       "method": "POST",
-      "path": "/testone/items",
+      "path": "/mock/items",
       "body": {
         "type": "JSON",
         "json": {}
@@ -145,7 +145,7 @@
     "httpResponse": {
       "statusCode": 201,
       "headers": {
-        "Location": ["/testone/items/123"],
+        "Location": ["/mock/items/123"],
         "Content-Type": ["application/json"]
       },
       "body": { "id": 123, "msg": "created" }
@@ -155,7 +155,7 @@
   {
     "httpRequest": {
       "method": "PUT",
-      "path": "/testone/items/123"
+      "path": "/mock/items/123"
     },
     "httpResponse": {
       "statusCode": 204
@@ -165,7 +165,7 @@
   {
     "httpRequest": {
       "method": "DELETE",
-      "path": "/testone/items/123"
+      "path": "/mock/items/123"
     },
     "httpResponse": {
       "statusCode": 204
@@ -175,7 +175,7 @@
   {
     "httpRequest": {
       "method": "DELETE",
-      "path": "/testone/items/999"
+      "path": "/mock/items/999"
     },
     "httpResponse": {
       "statusCode": 404,
@@ -186,7 +186,7 @@
   {
     "httpRequest": {
       "method": "PUT",
-      "path": "/testone/user/{userId}",
+      "path": "/mock/user/{userId}",
       "pathParameters": {
         "userId": ["^[0-9]+$"]
       }
@@ -203,7 +203,7 @@
   {
     "httpRequest": {
       "method": "POST",
-      "path": "/testone/echo",
+      "path": "/mock/echo",
       "body": {
         "type": "STRING",
         "value": ""
@@ -219,7 +219,7 @@
   {
     "httpRequest": {
       "method": "GET",
-      "path": "/testone/slow"
+      "path": "/mock/slow"
     },
     "httpResponse": {
       "statusCode": 200,
@@ -234,7 +234,7 @@
   {
     "httpRequest": {
       "method": "GET",
-      "path": "/testone/bad-request"
+      "path": "/mock/bad-request"
     },
     "httpResponse": {
       "statusCode": 400,
