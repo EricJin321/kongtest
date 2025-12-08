@@ -1,8 +1,26 @@
 import ServiceWebApi from '../utils/servicewebapi';
+import KongManager from '../utils/kongManager';
 
 describe('Comprehensive API Tests', () => {
+  // Top-level known service name constant (module-scoped)
+  const basicTestService = 'BasicTestService';
+
+  before(() => {
+    // Create a service in Kong Manager via UI and alias its id; the name is the known constant
+    return KongManager.createService('http://mockserver:1080', { name: basicTestService }).then((id) => {
+      cy.wrap(id).as('createdServiceId');
+    });
+  });
+
   beforeEach(() => {
     cy.log('Starting comprehensive API test');
+  });
+
+  after(() => {
+    // Delete the service created in the before hook using the known basicTestService constant
+    if (basicTestService) {
+      KongManager.deleteService(basicTestService);
+    }
   });
 
   it('should test getHelloApi', () => {
