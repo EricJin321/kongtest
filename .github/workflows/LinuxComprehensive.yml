@@ -1,11 +1,11 @@
-name: Manual Ready CI
+name: Linux Comprehensive CI
 
 on:
   workflow_dispatch: {}
 
 jobs:
-  manual-ready:
-    runs-on: windows-latest
+  linux-comprehensive:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -13,17 +13,19 @@ jobs:
       - name: List repository files
         run: |
           echo "Workspace files:" 
-          dir
+          ls -la
 
-      - name: Setup Node.js
+      - name: Setup Node.js (optional)
         uses: actions/setup-node@v4
         with:
           node-version: '24'
 
       - name: Print Node and npm versions
         run: |
-          node -v
-          npm -v
+          node -v || true
+          npm -v || true
+
+      # Assume runner provides Docker and docker compose; remove explicit install to speed up workflow
 
       - name: Start services with docker-compose
         run: |
@@ -31,35 +33,29 @@ jobs:
           docker compose -f deployment/docker-compose.yml up -d
 
       - name: Wait for Kong Manager to be reachable
-        shell: pwsh
         run: |
-          $TARGET = "http://localhost:8002/default/services"
-          $TIMEOUT = 120
-          $INTERVAL = 2
-          Write-Host "Waiting for $TARGET (timeout ${TIMEOUT}s)"
-          $START = Get-Date
-          while ($true) {
-            try {
-              $response = Invoke-WebRequest -Uri $TARGET -UseBasicParsing -TimeoutSec 5
-              if ($response.StatusCode -eq 200) {
-                Write-Host "OK: $TARGET is reachable"
-                break
-              }
-            } catch {
-              # Ignore errors and continue waiting
-            }
-            $NOW = Get-Date
-            $ELAPSED = ($NOW - $START).TotalSeconds
-            if ($ELAPSED -ge $TIMEOUT) {
-              Write-Host "Timed out waiting for $TARGET after ${TIMEOUT}s"
+          TARGET="http://localhost:8002/default/services"
+          TIMEOUT=120
+          INTERVAL=2
+          echo "Waiting for $TARGET (timeout ${TIMEOUT}s)"
+          START=$(date +%s)
+          while true; do
+            if curl -sSf -o /dev/null "$TARGET"; then
+              echo "OK: $TARGET is reachable"
+              break
+            fi
+            NOW=$(date +%s)
+            ELAPSED=$((NOW - START))
+            if [ "$ELAPSED" -ge "$TIMEOUT" ]; then
+              echo "Timed out waiting for $TARGET after ${TIMEOUT}s"
               exit 1
-            }
-            Start-Sleep -Seconds $INTERVAL
-          }
+            fi
+            sleep $INTERVAL
+          done
 
       - name: Curl the services endpoint (verbose)
         run: |
-          curl -v http://localhost:8002/default/services
+          curl -v http://localhost:8002/default/services || true
 
       - name: Install gatewaytest dependencies
         working-directory: gatewaytest
@@ -88,4 +84,3 @@ jobs:
           path: |
             gatewaytest/cypress/screenshots
             gatewaytest/cypress/videos
-
