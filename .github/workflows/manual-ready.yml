@@ -5,7 +5,7 @@ on:
 
 jobs:
   manual-ready:
-    runs-on: windows-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -13,7 +13,7 @@ jobs:
       - name: List repository files
         run: |
           echo "Workspace files:" 
-          dir
+          ls -la
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -25,76 +25,35 @@ jobs:
           node -v
           npm -v
 
-      - name: Enable WSL and install Ubuntu
-        shell: pwsh
-        run: |
-          Write-Host "Installing WSL Ubuntu distribution..."
-          wsl --install -d Ubuntu --no-launch
-          wsl --set-default-version 2
-
-      - name: Configure Docker to use Linux containers
-        shell: pwsh
-        run: |
-          Write-Host "Switching Docker to Linux containers..."
-          & "C:\Program Files\Docker\Docker\DockerCli.exe" -SwitchLinuxEngine
-          Start-Sleep -Seconds 10
-
-      - name: Verify Docker is running
-        shell: pwsh
-        run: |
-          $maxAttempts = 30
-          $attempt = 0
-          while ($attempt -lt $maxAttempts) {
-            try {
-              docker version
-              Write-Host "Docker is ready"
-              break
-            } catch {
-              Write-Host "Waiting for Docker... (attempt $($attempt + 1)/$maxAttempts)"
-              Start-Sleep -Seconds 5
-              $attempt++
-            }
-          }
-          if ($attempt -eq $maxAttempts) {
-            Write-Host "Docker failed to start"
-            exit 1
-          }
-
       - name: Start services with docker-compose
         run: |
           echo "Starting docker-compose from deployment/docker-compose.yml"
           docker compose -f deployment/docker-compose.yml up -d
 
       - name: Wait for Kong Manager to be reachable
-        shell: pwsh
         run: |
-          $TARGET = "http://localhost:8002/default/services"
-          $TIMEOUT = 120
-          $INTERVAL = 2
-          Write-Host "Waiting for $TARGET (timeout ${TIMEOUT}s)"
-          $START = Get-Date
-          while ($true) {
-            try {
-              $response = Invoke-WebRequest -Uri $TARGET -UseBasicParsing -TimeoutSec 5 -ErrorAction SilentlyContinue
-              if ($response.StatusCode -eq 200) {
-                Write-Host "OK: $TARGET is reachable"
-                break
-              }
-            } catch {
-              # Ignore errors and continue waiting
-            }
-            $NOW = Get-Date
-            $ELAPSED = ($NOW - $START).TotalSeconds
-            if ($ELAPSED -ge $TIMEOUT) {
-              Write-Host "Timed out waiting for $TARGET after ${TIMEOUT}s"
+          TARGET="http://localhost:8002/default/services"
+          TIMEOUT=120
+          INTERVAL=2
+          echo "Waiting for $TARGET (timeout ${TIMEOUT}s)"
+          START=$(date +%s)
+          while true; do
+            if curl -sSf -o /dev/null "$TARGET"; then
+              echo "OK: $TARGET is reachable"
+              break
+            fi
+            NOW=$(date +%s)
+            ELAPSED=$((NOW - START))
+            if [ "$ELAPSED" -ge "$TIMEOUT" ]; then
+              echo "Timed out waiting for $TARGET after ${TIMEOUT}s"
               exit 1
-            }
-            Start-Sleep -Seconds $INTERVAL
-          }
+            fi
+            sleep $INTERVAL
+          done
 
       - name: Curl the services endpoint (verbose)
         run: |
-          curl -v http://localhost:8002/default/services
+          curl -v http://localhost:8002/default/services || true
 
       - name: Install gatewaytest dependencies
         working-directory: gatewaytest
