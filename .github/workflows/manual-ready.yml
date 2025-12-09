@@ -25,6 +25,41 @@ jobs:
           node -v
           npm -v
 
+      - name: Enable WSL and install Ubuntu
+        shell: pwsh
+        run: |
+          Write-Host "Installing WSL Ubuntu distribution..."
+          wsl --install -d Ubuntu --no-launch
+          wsl --set-default-version 2
+
+      - name: Configure Docker to use Linux containers
+        shell: pwsh
+        run: |
+          Write-Host "Switching Docker to Linux containers..."
+          & "C:\Program Files\Docker\Docker\DockerCli.exe" -SwitchLinuxEngine
+          Start-Sleep -Seconds 10
+
+      - name: Verify Docker is running
+        shell: pwsh
+        run: |
+          $maxAttempts = 30
+          $attempt = 0
+          while ($attempt -lt $maxAttempts) {
+            try {
+              docker version
+              Write-Host "Docker is ready"
+              break
+            } catch {
+              Write-Host "Waiting for Docker... (attempt $($attempt + 1)/$maxAttempts)"
+              Start-Sleep -Seconds 5
+              $attempt++
+            }
+          }
+          if ($attempt -eq $maxAttempts) {
+            Write-Host "Docker failed to start"
+            exit 1
+          }
+
       - name: Start services with docker-compose
         run: |
           echo "Starting docker-compose from deployment/docker-compose.yml"
@@ -40,7 +75,7 @@ jobs:
           $START = Get-Date
           while ($true) {
             try {
-              $response = Invoke-WebRequest -Uri $TARGET -UseBasicParsing -TimeoutSec 5
+              $response = Invoke-WebRequest -Uri $TARGET -UseBasicParsing -TimeoutSec 5 -ErrorAction SilentlyContinue
               if ($response.StatusCode -eq 200) {
                 Write-Host "OK: $TARGET is reachable"
                 break
