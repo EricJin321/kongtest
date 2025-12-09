@@ -1,0 +1,244 @@
+[
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/mock/hello"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": { "msg": "hello world" }
+    }
+  },
+
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/mock/resource",
+      "headers": {
+        "If-Modified-Since": [".+"]
+      }
+    },
+    "httpResponse": {
+      "statusCode": 304,
+      "headers": {
+        "Cache-Control": ["max-age=3600"]
+      }
+    }
+  },
+
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/mock/resource"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"],
+        "ETag": ["\"v1\""]
+      },
+      "body": { "data": "fresh resource" }
+    }
+  },
+
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/mock/redirect"
+    },
+    "httpResponse": {
+      "statusCode": 302,
+      "headers": {
+        "Location": ["/mock/new-location"]
+      }
+    }
+  },
+
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/mock/new-location"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["text/html"]
+      },
+      "body": "<html><body>New location reached</body></html>"
+    }
+  },
+
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/mock/private",
+      "headers": {
+        "Authorization": ["Bearer secret-token"]
+      }
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "body": { "msg": "authorized" },
+      "headers": { "Content-Type": ["application/json"] }
+    }
+  },
+
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/mock/private"
+    },
+    "httpResponse": {
+      "statusCode": 401,
+      "headers": {
+        "WWW-Authenticate": ["Bearer realm=\"example\""]
+      },
+      "body": { "error": "Unauthorized" }
+    }
+  },
+
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/mock/forbidden"
+    },
+    "httpResponse": {
+      "statusCode": 403,
+      "body": { "error": "Forbidden" }
+    }
+  },
+
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/mock/status/500"
+    },
+    "httpResponse": {
+      "statusCode": 500,
+      "body": { "error": "Internal Server Error" }
+    }
+  },
+
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/mock/status/418"
+    },
+    "httpResponse": {
+      "statusCode": 418,
+      "body": "I'm a teapot"
+    }
+  },
+
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/mock/items",
+      "body": {
+        "type": "JSON",
+        "json": {}
+      }
+    },
+    "httpResponse": {
+      "statusCode": 201,
+      "headers": {
+        "Location": ["/mock/items/123"],
+        "Content-Type": ["application/json"]
+      },
+      "body": { "id": 123, "msg": "created" }
+    }
+  },
+
+  {
+    "httpRequest": {
+      "method": "PUT",
+      "path": "/mock/items/123"
+    },
+    "httpResponse": {
+      "statusCode": 204
+    }
+  },
+
+  {
+    "httpRequest": {
+      "method": "DELETE",
+      "path": "/mock/items/123"
+    },
+    "httpResponse": {
+      "statusCode": 204
+    }
+  },
+
+  {
+    "httpRequest": {
+      "method": "DELETE",
+      "path": "/mock/items/999"
+    },
+    "httpResponse": {
+      "statusCode": 404,
+      "body": { "error": "not found" }
+    }
+  },
+
+  {
+    "httpRequest": {
+      "method": "PUT",
+      "path": "/mock/user/{userId}",
+      "pathParameters": {
+        "userId": ["^[0-9]+$"]
+      }
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": { "msg": "user updated" }
+    }
+  },
+
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/mock/echo",
+      "body": {
+        "type": "STRING",
+        "value": ""
+      }
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": { "Content-Type": ["application/json"] },
+      "body": { "msg": "echo response (fixed example)" }
+    }
+  },
+
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/mock/slow"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "delay": {
+        "timeUnit": "MILLISECONDS",
+        "value": 1500
+      },
+      "body": { "msg": "this response is slow (1.5s)" }
+    }
+  },
+
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/mock/bad-request"
+    },
+    "httpResponse": {
+      "statusCode": 400,
+      "body": { "error": "Bad Request" }
+    }
+  }
+]

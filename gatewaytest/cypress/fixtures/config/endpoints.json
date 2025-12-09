@@ -1,0 +1,13 @@
+{
+  "environments": {
+    "local": "localhost",
+    "staging": "staging.example.com",
+    "production": "prod.example.com"
+  },
+  "portPerProtocol": {
+    "http": 8000,
+    "https": 8443
+  }
+  ,
+  "servicePropagationWaitMs": 5000
+}

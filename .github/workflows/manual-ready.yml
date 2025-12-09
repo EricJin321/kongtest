@@ -1,0 +1,26 @@
+name: Manual Ready CI
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: List repository files
+        run: |
+          echo "Workspace files:" 
+          ls -la
+
+      - name: Setup Node.js (optional)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Print Node and npm versions
+        run: |
+          node -v || true
+          npm -v || true

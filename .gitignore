@@ -1,0 +1,4 @@
+gatewaytest/node_modules/
+gatewaytest/.cypress/
+gatewaytest/cypress/logs/
+gatewaytest/cypress/screenshots/
