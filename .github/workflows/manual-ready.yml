@@ -4,7 +4,7 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  build:
+  manual-ready:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -18,9 +18,70 @@ jobs:
       - name: Setup Node.js (optional)
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '24'
 
       - name: Print Node and npm versions
         run: |
           node -v || true
           npm -v || true
+
+      # Assume runner provides Docker and docker compose; remove explicit install to speed up workflow
+
+      - name: Start services with docker-compose
+        run: |
+          echo "Starting docker-compose from deployment/docker-compose.yml"
+          docker compose -f deployment/docker-compose.yml up -d
+
+      - name: Wait for Kong Manager to be reachable
+        run: |
+          TARGET="http://localhost:8002/default/services"
+          TIMEOUT=120
+          INTERVAL=2
+          echo "Waiting for $TARGET (timeout ${TIMEOUT}s)"
+          START=$(date +%s)
+          while true; do
+            if curl -sSf -o /dev/null "$TARGET"; then
+              echo "OK: $TARGET is reachable"
+              break
+            fi
+            NOW=$(date +%s)
+            ELAPSED=$((NOW - START))
+            if [ "$ELAPSED" -ge "$TIMEOUT" ]; then
+              echo "Timed out waiting for $TARGET after ${TIMEOUT}s"
+              exit 1
+            fi
+            sleep $INTERVAL
+          done
+
+      - name: Curl the services endpoint (verbose)
+        run: |
+          curl -v http://localhost:8002/default/services || true
+
+      - name: Install gatewaytest dependencies
+        working-directory: gatewaytest
+        run: |
+          npm ci
+
+      - name: Run comprehensive Cypress tests
+        working-directory: gatewaytest
+        env:
+          CI: true
+        run: |
+          npx cross-env TEST_SET=comprehensive npx cypress run
+
+      - name: Upload Cypress logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-logs
+          path: gatewaytest/cypress/logs
+
+      - name: Upload Cypress screenshots and videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-artifacts
+          path: |
+            gatewaytest/cypress/screenshots
+            gatewaytest/cypress/videos
+
