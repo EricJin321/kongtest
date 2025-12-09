@@ -99,13 +99,15 @@ class KongManager {
    * @param {string} options.name - route name (default: 'BasicRoute')
    * @param {string} options.path - route path (default: 'testbasic')
    * @param {Array<string>} options.methods - list of HTTP methods to select (e.g. ['GET','POST'])
+   * @param {string} options.protocols - protocol to select (e.g. 'HTTPS', 'HTTP')
    * @returns {Cypress.Chainable<string>} resolves to current URL after route creation steps
    */
-  static createRoute(serviceId, options = {}) {
+  static createRoute(serviceId, options = {}, stripPath = true) {
     const visitUrl = options.visitUrl || `http://localhost:8002/default/services/${serviceId}`;
     const routeName = options.name || 'BasicRoute';
     const routePath = options.path || 'testbasic';
     const methodsToSelect = options.methods || [];
+    const protocolToSelect = options.protocols || null;
     writeLog('OpenUrl: ' + visitUrl);
 
     const failHandler = (err) => {
@@ -143,6 +145,49 @@ class KongManager {
             cy.get('button').click({ force: true });
           });
       });
+    }
+
+    // Ensure the "Strip Path" checkbox matches the requested value.
+    // Default behavior: stripPath === true -> checkbox checked.
+    // The checkbox input uses `data-testid="route-form-strip-path"` per app markup.
+    cy.get('input[data-testid="route-form-strip-path"]', { timeout: 10000 })
+      .then(($inp) => {
+        // Determine current state: prefer `prop('checked')`, fall back to `aria-checked` when present
+        const isChecked = ($inp.prop('checked') === true) || ($inp.attr('aria-checked') === 'true');
+        if (stripPath && !isChecked) {
+          cy.wrap($inp).click({ force: true });
+        } else if (!stripPath && isChecked) {
+          cy.wrap($inp).click({ force: true });
+        }
+      });
+
+    // If protocols option is specified, switch to Advanced mode and select the protocol
+    if (protocolToSelect) {
+      // Click on the Advanced radio button
+      cy.get('input[data-testid="route-form-config-type-advanced"]', { timeout: 10000 })
+        .scrollIntoView()
+        .should('exist')
+        .then(($radio) => {
+          // Click the label instead of the input for better compatibility
+          cy.get('label[data-testid="route-form-config-type-advanced-label"]', { timeout: 10000 })
+            .click({ force: true });
+        });
+
+      // Click on the protocols input field to open the dropdown
+      cy.get('input[data-testid="route-form-protocols"]', { timeout: 10000 })
+        .scrollIntoView()
+        .should('be.visible')
+        .click({ force: true });
+
+      // Select the specified protocol from the dropdown by matching the label text
+      cy.contains('span.select-item-label', protocolToSelect, { timeout: 10000 })
+        .should('exist')
+        .then(($span) => {
+          if ($span.length === 0) {
+            throw new Error(`Protocol ${protocolToSelect} not found in dropdown`);
+          }
+          cy.wrap($span).click({ force: true });
+        });
     }
 
     // Submit route form

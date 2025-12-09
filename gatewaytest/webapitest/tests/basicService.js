@@ -8,13 +8,10 @@ describe('BasicTestService API Tests', () => {
   const basicRoutePath = '/testbasic';
 
   before(() => {
-    // Create a service in Kong Manager via UI and alias its id; the name is the known constant
+    // Create a service in Kong Manager via UI
     return KongManager.createService('http://mockserver:1080', { name: basicTestService }).then((id) => {
-      cy.wrap(id).as('createdServiceId');
       // Create a Route for the newly created service using KongManager helper
-      return KongManager.createRoute(id, { name: basicRouteName, path: basicRoutePath, methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS','HEAD'] }).then((routeId) => {
-        cy.wrap(routeId).as('createdRouteId');
-      });
+      return KongManager.createRoute(id, { name: basicRouteName, path: basicRoutePath, methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS','HEAD'] });
     })
     // Wait according to configured propagation time (in endpoints.json)
     .then(() => cy.fixture('config/endpoints.json').then(cfg => cy.wait(cfg.servicePropagationWaitMs || 8000)));
@@ -33,6 +30,10 @@ describe('BasicTestService API Tests', () => {
 
   it('should test getHelloApi', () => {
     ServiceWebApi.getHelloApi(basicRoutePath, false, 200, { msg: 'hello world' });
+  });
+
+  it('should pass with https', () => {
+    ServiceWebApi.getHelloApi(basicRoutePath, true, 200, { msg: 'hello world' });
   });
 
   it('should test getResourceApi without If-Modified-Since', () => {

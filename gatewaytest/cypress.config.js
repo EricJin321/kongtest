@@ -9,10 +9,11 @@ const getSpecPattern = () => {
   
     const patterns = {
     all: 'webapitest/tests/**/*.cy.js',
-    'protocol-check': 'webapitest/tests/protocol-check.cy.js',
-    basic: 'webapitest/tests/basic.cy.js',
-    // comprehensive runs both the basicService and httpsService specs
-    comprehensive: 'webapitest/tests/{basicService.js,httpsService.js}',
+    // comprehensive runs basicService, httpsService and noStripPath specs
+    comprehensive: 'webapitest/tests/{regexMatchTest.js,basicService.js,httpsService.js,noStripPath.js,methodNotSupport.js,httpBlockTest.js}',
+    // basic runs only basicService spec
+    //comprehensive: 'webapitest/tests/httpBlockTest.js',
+    basic: 'webapitest/tests/basicService.js',
   };
 
   return patterns[testSet] || patterns['all'];

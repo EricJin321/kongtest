@@ -61,7 +61,15 @@ export function apiRequest(url, isHttps = false, options = {}) {
               bodyStr = '[unserializable]';
             }
 
-            const taskMessage = `apiRequest response: status=${response && response.status}, body=${bodyStr}`;
+            // Safely stringify the headers for logging
+            let headersStr;
+            try {
+              headersStr = JSON.stringify(response && response.headers);
+            } catch (e) {
+              headersStr = '[unserializable]';
+            }
+
+            const taskMessage = `apiRequest response: status=${response && response.status}, headers=${headersStr}, body=${bodyStr}`;
 
             // Write response log and return the response wrapped as a chainable
             return writeLog(taskMessage).then(() => cy.wrap(response));
