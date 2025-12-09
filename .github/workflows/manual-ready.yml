@@ -25,12 +25,7 @@ jobs:
           node -v || true
           npm -v || true
 
-      - name: Ensure Docker Compose plugin is installed
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose-plugin || true
-          docker --version || true
-          docker compose version || true
+      # Assume runner provides Docker and docker compose; remove explicit install to speed up workflow
 
       - name: Start services with docker-compose
         run: |
@@ -61,4 +56,32 @@ jobs:
       - name: Curl the services endpoint (verbose)
         run: |
           curl -v http://localhost:8002/default/services || true
+
+      - name: Install gatewaytest dependencies
+        working-directory: gatewaytest
+        run: |
+          npm ci
+
+      - name: Run comprehensive Cypress tests
+        working-directory: gatewaytest
+        env:
+          CI: true
+        run: |
+          npx cross-env TEST_SET=comprehensive npx cypress run
+
+      - name: Upload Cypress logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-logs
+          path: gatewaytest/cypress/logs
+
+      - name: Upload Cypress screenshots and videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-artifacts
+          path: |
+            gatewaytest/cypress/screenshots
+            gatewaytest/cypress/videos
 
