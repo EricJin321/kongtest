@@ -12,18 +12,18 @@ export function apiRequest(url, isHttps = false, options = {}) {
   const body = options.body;
   const headers = options.headers || {};
   
-  // Build log message
-  let logMessage = `apiRequest called with URL: ${url}, method: ${method}, isHttps: ${isHttps}`;
-  if (body) {
-    logMessage += `, body: ${JSON.stringify(body)}`;
-  }
-  if (Object.keys(headers).length > 0) {
-    logMessage += `, headers: ${JSON.stringify(headers)}`;
-  }
+    // Build log message (we will write it to file via writeLog and not log to screen)
+    let logMessage = `apiRequest called with URL: ${url}, method: ${method}, isHttps: ${isHttps}`;
+    if (body) {
+      logMessage += `, body: ${JSON.stringify(body)}`;
+    }
+    if (Object.keys(headers).length > 0) {
+      logMessage += `, headers: ${JSON.stringify(headers)}`;
+    }
   
-  writeLog(logMessage);
-  cy.log(`Final URL: ${url}, Method: ${method}`);
-  
+    // Start by writing the request log, then perform the request, then log the response.
+    return writeLog(logMessage)
+      .then(() => {
   const requestOptions = {
     url: url,
     method: method,
@@ -51,5 +51,20 @@ export function apiRequest(url, isHttps = false, options = {}) {
     requestOptions.insecure = true;
   }
 
-  return cy.request(requestOptions);
+        return cy.request(requestOptions)
+          .then((response) => {
+            // Safely stringify the body for logging
+            let bodyStr;
+            try {
+              bodyStr = JSON.stringify(response && response.body);
+            } catch (e) {
+              bodyStr = '[unserializable]';
+            }
+
+            const taskMessage = `apiRequest response: status=${response && response.status}, body=${bodyStr}`;
+
+            // Write response log and return the response wrapped as a chainable
+            return writeLog(taskMessage).then(() => cy.wrap(response));
+          });
+      });
 }

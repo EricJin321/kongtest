@@ -6,6 +6,6 @@ export function writeLog(message) {
   const timestamp = new Date().toISOString();
   const logMessage = `[${timestamp}] ${message}`;
   
-  // Use cy.task to write log from Node.js side
-  cy.task('writeLog', logMessage, { log: false });
+  // Use cy.task to write log from Node.js side and return the chainable so callers can compose
+  return cy.task('writeLog', logMessage, { log: false });
 }

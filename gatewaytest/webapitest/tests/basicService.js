@@ -1,7 +1,7 @@
 import ServiceWebApi from '../utils/servicewebapi';
 import KongManager from '../utils/kongManager';
 
-describe('Comprehensive API Tests', () => {
+describe('BasicTestService API Tests', () => {
   // Top-level known service name constant (module-scoped)
   const basicTestService = 'BasicTestService';
   const basicRouteName = 'BasicRoute';
@@ -15,16 +15,20 @@ describe('Comprehensive API Tests', () => {
       return KongManager.createRoute(id, { name: basicRouteName, path: basicRoutePath, methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS','HEAD'] }).then((routeId) => {
         cy.wrap(routeId).as('createdRouteId');
       });
-    });
+    })
+    // Wait according to configured propagation time (in endpoints.json)
+    .then(() => cy.fixture('config/endpoints.json').then(cfg => cy.wait(cfg.servicePropagationWaitMs || 8000)));
   });
 
   beforeEach(() => {
-    cy.log('Starting comprehensive API test');
+    return cy.log('Starting BasicTestService API test');
   });
 
   after(() => {
     // Delete the service created in the before hook using the known basicTestService constant
     
+    return KongManager.deleteRoute(basicRouteName)
+      .then(() => KongManager.deleteService(basicTestService));
   });
 
   it('should test getHelloApi', () => {
