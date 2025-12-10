@@ -40,9 +40,11 @@ export function apiRequest(url, isHttps = false, options = {}) {
     requestOptions.headers = headers;
   }
 
-  // Add followRedirect if specified
+  // Add followRedirect if specified, otherwise default to false
   if (options.followRedirect !== undefined) {
     requestOptions.followRedirect = options.followRedirect;
+  } else {
+    requestOptions.followRedirect = false;
   }
 
   // Ignore TLS validation for self-signed certificates on HTTPS

@@ -1,5 +1,5 @@
 import ServiceWebApi from '../utils/servicewebapi';
-import KongManager from '../utils/kongManager';
+import KongManager from '../../utils/kongManager';
 
 describe('HTTPS TestService API Tests', () => {
   // Module-scoped constants for this HTTPS variant

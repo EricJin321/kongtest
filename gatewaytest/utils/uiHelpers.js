@@ -18,19 +18,19 @@
 export function fillInput(selector, value, opts = {}) {
   const { timeout = 10000, clear = true, scroll = true } = opts;
   
-  let chain = cy.get(selector, { timeout });
-  
-  if (scroll) {
-    chain = chain.scrollIntoView();
-  }
-  
-  chain = chain.should('be.visible');
-  
-  if (clear) {
-    chain = chain.clear();
-  }
-  
-  return chain.type(value);
+  return cy.get(selector, { timeout }).then(($el) => {
+    if (scroll) {
+      cy.wrap($el).scrollIntoView();
+    }
+    
+    cy.wrap($el).should('be.visible');
+    
+    if (clear) {
+      cy.wrap($el).clear();
+    }
+    
+    cy.wrap($el).type(value);
+  });
 }
 
 /**
@@ -200,4 +200,24 @@ export function findAndDeleteRow(tableSelector, name, opts = {}) {
     // Wait for row to disappear
     return cy.contains(nameCellSelector, name, { timeout }).should('not.exist');
   });
+}
+
+/**
+ * Click a sidebar item, handling the sidebar toggle if necessary.
+ * 
+ * @param {string} itemName - The name of the sidebar item to click (e.g., 'Gateway Services')
+ */
+export function clickSidebarItem(itemName) {
+  // Wait for DOM to stabilize after navigation
+  cy.wait(1000);
+  cy.get('body').then(($body) => {
+    const toggle = $body.find('.sidebar-menu-toggle');
+    if (toggle.length > 0 && toggle.is(':visible')) {
+      cy.wrap(toggle).click();
+      // Wait for sidebar animation to complete
+      cy.wait(500);
+    }
+  });
+  
+  cy.contains('.sidebar-item-name', itemName).should('be.visible').click();
 }

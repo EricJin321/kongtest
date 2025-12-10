@@ -1,5 +1,5 @@
 import ServiceWebApi from '../utils/servicewebapi';
-import KongManager from '../utils/kongManager';
+import KongManager from '../../utils/kongManager';
 
 describe('Method Not Supported API Tests', () => {
   // Top-level known service name constant (module-scoped)
@@ -53,5 +53,28 @@ describe('Method Not Supported API Tests', () => {
 
   it('should test postEchoApi with POST method (not allowed)', () => {
     ServiceWebApi.postEchoApi(testRoutePath, false, 'test data', 404, null);
+  });
+  describe('POST-only route tests', () => {
+    const postOnlyService = 'PostOnlyService';
+    const postOnlyRoute = 'PostOnlyRoute';
+    const postOnlyPath = '/postonly';
+
+    before(() => {
+      return KongManager.createService('http://mockserver:1080', { name: postOnlyService })
+        .then((id) => KongManager.createRoute(id, { name: postOnlyRoute, path: postOnlyPath, methods: ['POST'] }))
+        .then(() => cy.fixture('config/endpoints.json').then(cfg => cy.wait(cfg.servicePropagationWaitMs || 8000)));
+    });
+
+    after(() => {
+      return KongManager.deleteRoute(postOnlyRoute).then(() => KongManager.deleteService(postOnlyService));
+    });
+
+    it('GET should return 404 for POST-only route', () => {
+      ServiceWebApi.getHelloApi(postOnlyPath, false, 404, null);
+    });
+
+    it('POST should succeed for POST-only route', () => {
+      return ServiceWebApi.postItemApi(postOnlyPath, false, {}, 201, { id: 123, msg: 'created' });
+    });
   });
 });

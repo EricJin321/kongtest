@@ -1,5 +1,5 @@
 import ServiceWebApi from '../utils/servicewebapi';
-import KongManager from '../utils/kongManager';
+import KongManager from '../../utils/kongManager';
 
 describe('Regex Match Test API Tests', () => {
   // Top-level known service name constant (module-scoped)

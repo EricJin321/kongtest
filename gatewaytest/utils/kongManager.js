@@ -1,11 +1,11 @@
-import { writeLog } from './logger.js';
+import { writeLog } from '../webapitest/utils/logger.js';
 import {
   fillInput,
   clickWhenEnabled,
   selectMultiselectItems,
   ensureCheckbox,
   findAndDeleteRow
-} from '../../utils/uiHelpers.js';
+} from './uiHelpers.js';
 
 /**
  * Create a scoped fail handler that logs errors and rethrows.
@@ -47,19 +47,15 @@ class KongManager {
     cy.visit(visitUrl);
 
     // Click the Add toolbar anchor — prefer the toolbar button, fallback to empty-state anchor.
-    // Use a non-throwing DOM lookup so absence of the primary button falls back gracefully.
-    cy.get('body', { timeout: 10000 }).then(($body) => {
-      const $primary = $body.find('a[data-testid="toolbar-add-gateway-service"]');
-      if ($primary && $primary.length) {
-        cy.wrap($primary.first()).should('be.visible').click({ force: true });
-      } else {
-        // Fallback selector: empty state action anchor or the explicit anchor for creating services
-        cy.get('a[data-testid="empty-state-action"], a.k-button.medium.primary[href="/default/services/create"]', { timeout: 10000 })
-          .should('be.visible')
-          .first()
-          .click({ force: true });
-      }
-    });
+    // Use a combined selector and wait for at least one to be visible to handle async rendering.
+    const createServiceSelector = 'a[data-testid="toolbar-add-gateway-service"], a[data-testid="empty-state-action"], a.k-button.medium.primary[href="/default/services/create"]';
+    cy.get(createServiceSelector, { timeout: 10000 })
+      .should(($els) => {
+        expect($els.filter(':visible').length).to.be.gt(0, 'Expected create service button to be visible');
+      })
+      .filter(':visible')
+      .first()
+      .click({ force: true });
 
     // Verify navigation to the Create Service page occurred
     cy.url({ timeout: 10000 }).should('include', '/default/services/create');
@@ -115,6 +111,7 @@ class KongManager {
     const routePath = options.path || 'testbasic';
     const methodsToSelect = options.methods || [];
     const protocolToSelect = options.protocols || null;
+    const httpRedirectCode = options.httpRedirectCode || null;
     writeLog('OpenUrl: ' + visitUrl);
 
     const failHandler = createFailHandler('KongManager.createRoute', `service ${serviceId}`);
@@ -140,25 +137,25 @@ class KongManager {
     // Ensure the "Strip Path" checkbox matches the requested value.
     ensureCheckbox('input[data-testid="route-form-strip-path"]', stripPath);
 
-    // If protocols option is specified, switch to Advanced mode and select the protocol
-    if (protocolToSelect) {
-      // Click on the Advanced radio button
+    // If protocols option or http redirect code is specified, switch to Advanced mode
+    if (protocolToSelect || httpRedirectCode) {
+      // Click on the Advanced radio button (click label for compatibility)
       cy.get('input[data-testid="route-form-config-type-advanced"]', { timeout: 10000 })
         .scrollIntoView()
         .should('exist')
-        .then(($radio) => {
-          // Click the label instead of the input for better compatibility
+        .then(() => {
           cy.get('label[data-testid="route-form-config-type-advanced-label"]', { timeout: 10000 })
             .click({ force: true });
         });
+    }
 
-      // Click on the protocols input field to open the dropdown
+    // If a protocol is requested, open protocols dropdown and select it
+    if (protocolToSelect) {
       cy.get('input[data-testid="route-form-protocols"]', { timeout: 10000 })
         .scrollIntoView()
         .should('be.visible')
         .click({ force: true });
 
-      // Select the specified protocol from the dropdown by matching the label text
       cy.contains('span.select-item-label', protocolToSelect, { timeout: 10000 })
         .should('exist')
         .then(($span) => {
@@ -166,6 +163,23 @@ class KongManager {
             throw new Error(`Protocol ${protocolToSelect} not found in dropdown`);
           }
           cy.wrap($span).click({ force: true });
+        });
+    }
+
+    // If httpRedirectCode is specified, open the redirect status dropdown and select the matching code
+    if (httpRedirectCode) {
+      // Click the status code input to open the dropdown
+      cy.get('input[data-testid="route-form-http-redirect-status-code"]', { timeout: 10000 })
+        .scrollIntoView()
+        .should('exist')
+        .click({ force: true });
+
+      // Select the status code label from the dropdown
+      cy.contains('span.select-item-label', String(httpRedirectCode), { timeout: 10000 })
+        .should('exist')
+        .then(($el) => {
+          if ($el.length === 0) throw new Error(`HTTP redirect code ${httpRedirectCode} not found`);
+          cy.wrap($el).click({ force: true });
         });
     }
 

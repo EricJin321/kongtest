@@ -1,4 +1,4 @@
-import KongManager from '../utils/kongManager.js';
+import KongManager from '../../../utils/kongManager.js';
 import { writeLog } from '../utils/logger.js';
 
 describe('Comprehensive API Tests', () => {

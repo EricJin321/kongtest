@@ -1,4 +1,4 @@
-name: Linux Comprehensive CI
+name: Linux Kong Test All
 
 on:
   workflow_dispatch: {}
@@ -67,7 +67,7 @@ jobs:
         env:
           CI: true
         run: |
-          npx cross-env TEST_SET=comprehensive npx cypress run
+          npx cross-env TEST_SET=all npx cypress run
 
       - name: Upload Cypress logs
         if: always()
