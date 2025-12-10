@@ -1,11 +1,11 @@
-name: Manual Ready CI
+name: Linux Kong Test All
 
 on:
   workflow_dispatch: {}
 
 jobs:
-  manual-ready:
-    runs-on: macos-latest
+  linux-comprehensive:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -15,15 +15,17 @@ jobs:
           echo "Workspace files:" 
           ls -la
 
-      - name: Setup Node.js
+      - name: Setup Node.js (optional)
         uses: actions/setup-node@v4
         with:
           node-version: '24'
 
       - name: Print Node and npm versions
         run: |
-          node -v
-          npm -v
+          node -v || true
+          npm -v || true
+
+      # Assume runner provides Docker and docker compose; remove explicit install to speed up workflow
 
       - name: Start services with docker-compose
         run: |
@@ -65,7 +67,7 @@ jobs:
         env:
           CI: true
         run: |
-          npx cross-env TEST_SET=comprehensive npx cypress run
+          npx cross-env TEST_SET=all npx cypress run
 
       - name: Upload Cypress logs
         if: always()
@@ -82,4 +84,3 @@ jobs:
           path: |
             gatewaytest/cypress/screenshots
             gatewaytest/cypress/videos
-

@@ -1,4 +1,4 @@
-import KongManager from '../utils/kongManager.js';
+import KongManager from '../../../utils/kongManager.js';
 import { writeLog } from '../utils/logger.js';
 
 describe('Comprehensive API Tests', () => {
@@ -7,10 +7,7 @@ describe('Comprehensive API Tests', () => {
   before(() => {
     // Create service and route (debug)
     return KongManager.createService('http://mockserver:1080', { name: basicTestService }).then((id) => {
-      cy.wrap(id).as('createdServiceId');
-      return KongManager.createRoute(id, { name: 'BasicRoute', path: '/testbasic', methods: ['GET','PUT'] }).then((routeId) => {
-        return cy.wrap(routeId).as('createdRouteId');
-      });
+      return KongManager.createRoute(id, { name: 'BasicRoute', path: '/testbasic', methods: ['GET','PUT'] });
     });
   });
 
