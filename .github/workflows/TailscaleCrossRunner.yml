@@ -1,0 +1,175 @@
+name: Tailscale Cross-Runner CI
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  # Job 1: Linux runner 启动 Docker 服务
+  setup-services:
+    runs-on: ubuntu-latest
+    outputs:
+      tailscale-ip: ${{ steps.get-ip.outputs.ip }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          # OAuth client key from Tailscale admin console
+          # https://login.tailscale.com/admin/settings/keys
+      
+      - name: Get Tailscale IP address
+        id: get-ip
+        run: |
+          IP=$(tailscale ip -4)
+          echo "ip=$IP" >> $GITHUB_OUTPUT
+          echo "Tailscale IP: $IP"
+          echo "This IP will be used by other jobs to connect"
+
+      - name: Start Docker services
+        run: |
+          echo "Starting docker-compose from deployment/docker-compose.yml"
+          docker compose -f deployment/docker-compose.yml up -d
+
+      - name: Wait for Kong Manager to be reachable
+        run: |
+          TARGET="http://localhost:8002/default/services"
+          TIMEOUT=120
+          INTERVAL=2
+          echo "Waiting for $TARGET (timeout ${TIMEOUT}s)"
+          START=$(date +%s)
+          while true; do
+            if curl -sSf -o /dev/null "$TARGET"; then
+              echo "OK: $TARGET is reachable"
+              break
+            fi
+            NOW=$(date +%s)
+            ELAPSED=$((NOW - START))
+            if [ "$ELAPSED" -ge "$TIMEOUT" ]; then
+              echo "Timed out waiting for $TARGET after ${TIMEOUT}s"
+              exit 1
+            fi
+            sleep $INTERVAL
+          done
+
+      - name: Test local access
+        run: |
+          echo "Testing local access to Kong Manager"
+          curl -v http://localhost:8002/default/services || true
+          echo "Services are ready and accessible locally"
+
+      - name: Keep services running for other jobs
+        run: |
+          echo "Keeping services running for 20 minutes..."
+          echo "Other jobs can now connect to Kong via Tailscale IP"
+          sleep 1200  # Keep running for 20 minutes
+
+  # Job 2: Windows runner 连接到 Linux 上的服务
+  test-on-windows:
+    runs-on: windows-latest
+    needs: setup-services
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Tailscale on Windows
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Test connection to Linux services
+        env:
+          KONG_IP: ${{ needs.setup-services.outputs.tailscale-ip }}
+        run: |
+          echo "Connecting to Kong Manager at $env:KONG_IP"
+          curl -v "http://$($env:KONG_IP):8002/default/services"
+
+      - name: Install gatewaytest dependencies
+        working-directory: gatewaytest
+        run: npm ci
+
+      - name: Update config to use Tailscale IP
+        working-directory: gatewaytest
+        env:
+          KONG_IP: ${{ needs.setup-services.outputs.tailscale-ip }}
+        shell: pwsh
+        run: |
+          # 修改配置文件使用 Tailscale IP 而不是 localhost
+          # 这里需要根据你的配置文件格式调整
+          Write-Host "Kong IP from Tailscale: $env:KONG_IP"
+          # 可以通过环境变量传递或修改配置文件
+
+      - name: Run Cypress tests on Windows
+        working-directory: gatewaytest
+        env:
+          CI: true
+          # 通过环境变量传递 Kong 的 IP
+          KONG_MANAGER_HOST: ${{ needs.setup-services.outputs.tailscale-ip }}
+          KONG_PROXY_HOST: ${{ needs.setup-services.outputs.tailscale-ip }}
+        run: |
+          npx cross-env TEST_SET=basic npx cypress run
+
+      - name: Upload Cypress artifacts from Windows
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-windows-artifacts
+          path: |
+            gatewaytest/cypress/logs
+            gatewaytest/cypress/screenshots
+            gatewaytest/cypress/videos
+
+  # Job 3 (可选): macOS runner 也连接到同样的服务
+  test-on-macos:
+    runs-on: macos-latest
+    needs: setup-services
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Tailscale on macOS
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Test connection to Linux services
+        env:
+          KONG_IP: ${{ needs.setup-services.outputs.tailscale-ip }}
+        run: |
+          echo "Connecting to Kong Manager at $KONG_IP"
+          curl -v "http://$KONG_IP:8002/default/services"
+
+      - name: Install gatewaytest dependencies
+        working-directory: gatewaytest
+        run: npm ci
+
+      - name: Run Cypress tests on macOS
+        working-directory: gatewaytest
+        env:
+          CI: true
+          KONG_MANAGER_HOST: ${{ needs.setup-services.outputs.tailscale-ip }}
+          KONG_PROXY_HOST: ${{ needs.setup-services.outputs.tailscale-ip }}
+        run: |
+          npx cross-env TEST_SET=basic npx cypress run
+
+      - name: Upload Cypress artifacts from macOS
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-macos-artifacts
+          path: |
+            gatewaytest/cypress/logs
+            gatewaytest/cypress/screenshots
+            gatewaytest/cypress/videos

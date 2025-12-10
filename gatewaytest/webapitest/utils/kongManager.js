@@ -1,4 +1,31 @@
 import { writeLog } from './logger.js';
+import {
+  fillInput,
+  clickWhenEnabled,
+  selectMultiselectItems,
+  ensureCheckbox,
+  findAndDeleteRow
+} from '../../utils/uiHelpers.js';
+
+/**
+ * Create a scoped fail handler that logs errors and rethrows.
+ * @param {string} operation - Description of the operation (e.g., 'createService', 'deleteRoute')
+ * @param {string} context - Additional context (e.g., service name, route name)
+ * @returns {Function} The fail handler function
+ */
+function createFailHandler(operation, context = '') {
+  const failHandler = (err) => {
+    Cypress.off('fail', failHandler);
+    try {
+      const msg = context ? `${operation} failed for ${context}` : `${operation} failed`;
+      writeLog(`${msg}: ${err && err.message ? err.message : err}`);
+    } catch (e) {
+      /* ignore logger errors */
+    }
+    throw err;
+  };
+  return failHandler;
+}
 
 class KongManager {
   /**
@@ -12,20 +39,8 @@ class KongManager {
     const visitUrl = options.visitUrl || 'http://localhost:8002/default/services';
     const requestedName = options.name || null;
     writeLog('OpenUrl: ' + visitUrl);
-    // Scoped fail handler: log then rethrow
-    const failHandler = (err) => {
-      // Unregister immediately to avoid leaking the handler across tests
-      Cypress.off('fail', failHandler);
-      try {
-        // record error via existing logger
-        writeLog(`KongManager.createService failed: ${err && err.message ? err.message : err}`);
-      } catch (e) {
-        // swallow logger errors to avoid masking original error
-        /* intentionally empty */
-      }
-      // rethrow so Cypress still fails the test
-      throw err;
-    };
+    
+    const failHandler = createFailHandler('KongManager.createService');
     Cypress.on('fail', failHandler);
 
     // Visit the services page
@@ -53,25 +68,17 @@ class KongManager {
     // Fill Full Url
     cy.log(`Filling Full Url: ${fullUrl}`);
     writeLog(`Filling Full Url: ${fullUrl}`);
-    cy.get('[data-testid="gateway-service-url-input"]', { timeout: 10000 })
-      .should('be.visible')
-      .clear()
-      .type(fullUrl);
+    fillInput('[data-testid="gateway-service-url-input"]', fullUrl, { scroll: false });
 
     // Optionally fill Name
     if (requestedName) {
       cy.log(`Filling Name: ${requestedName}`);
       writeLog(`Filling Name: ${requestedName}`);
-      cy.get('[data-testid="gateway-service-name-input"]', { timeout: 10000 })
-        .should('be.visible')
-        .clear()
-        .type(requestedName);
+      fillInput('[data-testid="gateway-service-name-input"]', requestedName, { scroll: false });
     }
 
     // Submit form
-    cy.get('[data-testid="service-create-form-submit"]', { timeout: 10000 })
-      .should('be.enabled')
-      .click();
+    clickWhenEnabled('[data-testid="service-create-form-submit"]', { force: false });
     cy.log('Save clicked - waiting for redirect to service detail');
 
     // Wait specifically for a UUID-like GUID in the URL path to avoid matching '/create'
@@ -110,15 +117,7 @@ class KongManager {
     const protocolToSelect = options.protocols || null;
     writeLog('OpenUrl: ' + visitUrl);
 
-    const failHandler = (err) => {
-      Cypress.off('fail', failHandler);
-      try {
-        writeLog(`KongManager.createRoute failed for service ${serviceId}: ${err && err.message ? err.message : err}`);
-      } catch (e) {
-        /* ignore logger errors */
-      }
-      throw err;
-    };
+    const failHandler = createFailHandler('KongManager.createRoute', `service ${serviceId}`);
     Cypress.on('fail', failHandler);
 
     // Visit the service page and click Add a Route
@@ -130,36 +129,16 @@ class KongManager {
     cy.url().should('include', `serviceId=${serviceId}`);
 
     // Fill route name and path (scroll into view)
-    cy.get('[data-testid="route-form-name"]', { timeout: 10000 }).scrollIntoView().should('be.visible').clear().type(routeName);
-    cy.get('[data-testid="route-form-paths-input-1"]', { timeout: 10000 }).scrollIntoView().should('be.visible').clear().type(routePath);
+    fillInput('[data-testid="route-form-name"]', routeName);
+    fillInput('[data-testid="route-form-paths-input-1"]', routePath);
 
     // Open Methods multiselect and select requested methods
     if (methodsToSelect.length > 0) {
-      cy.contains('div', 'Select methods', { timeout: 10000 }).click({ force: true });
-      // select each requested method by its testid (e.g. multiselect-item-GET)
-      methodsToSelect.forEach((m) => {
-        const tid = `multiselect-item-${m}`;
-        cy.get(`[data-testid="${tid}"]`, { timeout: 10000 })
-          .should('exist')
-          .within(() => {
-            cy.get('button').click({ force: true });
-          });
-      });
+      selectMultiselectItems(() => cy.contains('div', 'Select methods', { timeout: 10000 }), methodsToSelect);
     }
 
     // Ensure the "Strip Path" checkbox matches the requested value.
-    // Default behavior: stripPath === true -> checkbox checked.
-    // The checkbox input uses `data-testid="route-form-strip-path"` per app markup.
-    cy.get('input[data-testid="route-form-strip-path"]', { timeout: 10000 })
-      .then(($inp) => {
-        // Determine current state: prefer `prop('checked')`, fall back to `aria-checked` when present
-        const isChecked = ($inp.prop('checked') === true) || ($inp.attr('aria-checked') === 'true');
-        if (stripPath && !isChecked) {
-          cy.wrap($inp).click({ force: true });
-        } else if (!stripPath && isChecked) {
-          cy.wrap($inp).click({ force: true });
-        }
-      });
+    ensureCheckbox('input[data-testid="route-form-strip-path"]', stripPath);
 
     // If protocols option is specified, switch to Advanced mode and select the protocol
     if (protocolToSelect) {
@@ -191,9 +170,7 @@ class KongManager {
     }
 
     // Submit route form
-    cy.get('[data-testid="route-create-form-submit"]', { timeout: 10000 })
-      .should('be.enabled')
-      .click({ force: true });
+    clickWhenEnabled('[data-testid="route-create-form-submit"]');
 
     // After save, return current URL
     cy.log('Save clicked - waiting for redirect after route creation');
@@ -214,57 +191,14 @@ class KongManager {
   static deleteService(serviceName, options = {}) {
     const visitUrl = options.visitUrl || 'http://localhost:8002/default/services';
 
-    // Scoped fail handler to log deletion errors
-    const failHandler = (err) => {
-      Cypress.off('fail', failHandler);
-      try {
-        writeLog(`KongManager.deleteService failed for ${serviceName}: ${err && err.message ? err.message : err}`);
-      } catch (e) {
-        /* ignore logger errors */
-      }
-      throw err;
-    };
+    const failHandler = createFailHandler('KongManager.deleteService', serviceName);
     Cypress.on('fail', failHandler);
 
     cy.visit(visitUrl);
 
-    // New robust flow: find the table rows, pick the row with the exact name match,
-    // then perform row-scoped actions to open the dropdown, click Delete, confirm and wait for removal.
-    return cy.get('table[data-tableid], table', { timeout: 15000 }).then(($tables) => {
-      const $table = $tables.first()[0];
-      const rows = $table ? $table.querySelectorAll('tbody tr') : [];
-      const matched = Array.from(rows).find((el) => {
-        const nameCell = el.querySelector('td[data-testid="name"] b');
-        return nameCell && nameCell.textContent && nameCell.textContent.trim() === serviceName;
-      });
-
-      if (!matched) {
-        Cypress.off('fail', failHandler);
-        throw new Error(`Service row not found for name: ${serviceName}`);
-      }
-
-      return cy.wrap(matched).then(($matchedRow) => {
-        cy.wrap($matchedRow)
-          .find('button[data-testid="row-actions-dropdown-trigger"]')
-          .first()
-          .click({ force: true });
-
-        cy.get('button[data-testid="action-entity-delete"]', { timeout: 10000 })
-          .filter(':visible')
-          .first()
-          .click({ force: true });
-
-        cy.get('input[data-testid="confirmation-input"]', { timeout: 10000 })
-          .should('be.visible')
-          .clear()
-          .type(serviceName);
-
-        cy.get('button[data-testid="modal-action-button"]', { timeout: 10000 })
-          .should('not.be.disabled')
-          .click({ force: true });
-
-        return cy.contains('td[data-testid="name"] b', serviceName, { timeout: 15000 }).should('not.exist');
-      });
+    // Use helper to find row by name and delete it
+    return findAndDeleteRow('table[data-tableid], table', serviceName).then(() => {
+      Cypress.off('fail', failHandler);
     });
   }
 
@@ -278,57 +212,16 @@ class KongManager {
   static deleteRoute(routeName, options = {}) {
     const visitUrl = options.visitUrl || 'http://localhost:8002/default/routes';
 
-    const failHandler = (err) => {
-      Cypress.off('fail', failHandler);
-      try {
-        writeLog(`KongManager.deleteRoute failed for ${routeName}: ${err && err.message ? err.message : err}`);
-      } catch (e) {
-        /* ignore logger errors */
-      }
-      throw err;
-    };
+    const failHandler = createFailHandler('KongManager.deleteRoute', routeName);
     Cypress.on('fail', failHandler);
 
     cy.visit(visitUrl);
 
-    // Find the routes table, locate the row with exact name match, then delete via row actions
-    return cy.get('table[data-tableid], table', { timeout: 15000 }).then(($tables) => {
-      const $table = $tables.first()[0];
-      const rows = $table ? $table.querySelectorAll('tbody tr') : [];
-      const matched = Array.from(rows).find((el) => {
-        const nameCell = el.querySelector('td[data-testid="name"] b');
-        return nameCell && nameCell.textContent && nameCell.textContent.trim() === routeName;
-      });
-
-      if (!matched) {
+    // Use helper to find row by name and delete it
+    return findAndDeleteRow('table[data-tableid], table', routeName)
+      .then(() => {
         Cypress.off('fail', failHandler);
-        return;
-        //throw new Error(`Route row not found for name: ${routeName}`);
-      }
-
-      return cy.wrap(matched).then(($matchedRow) => {
-        cy.wrap($matchedRow)
-          .find('button[data-testid="row-actions-dropdown-trigger"]')
-          .first()
-          .click({ force: true });
-
-        cy.get('button[data-testid="action-entity-delete"]', { timeout: 10000 })
-          .filter(':visible')
-          .first()
-          .click({ force: true });
-
-        cy.get('input[data-testid="confirmation-input"]', { timeout: 10000 })
-          .should('be.visible')
-          .clear()
-          .type(routeName);
-
-        cy.get('button[data-testid="modal-action-button"]', { timeout: 10000 })
-          .should('not.be.disabled')
-          .click({ force: true });
-
-        return cy.contains('td[data-testid="name"] b', routeName, { timeout: 15000 }).should('not.exist');
       });
-    });
   }
 }
 
