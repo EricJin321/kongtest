@@ -126,7 +126,7 @@ Validates Service and Route creation and functionality by executing various HTTP
   - Timeout handling validation.
   - Stress testing and request/response buffering verification.
 - **Compatibility**: Cross-OS and cross-browser testing setup.
-- **Accessibility**: Comprehensive audit plan (initial tab cycle and localization checks performed).
+- **Accessibility**: Comprehensive audit plan (initial tab cycle and localization checks performed manually).
 
 ## 🐛 Potential Bugs
 Known issues are documented in [Bug.md](Bug.md).

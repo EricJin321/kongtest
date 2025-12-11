@@ -31,8 +31,8 @@ jobs:
           # Install Colima, Docker, and Docker Compose
           brew install colima docker docker-compose
           
-          # Start Colima with sufficient resources
-          colima start --cpu 2 --memory 4 --network-address
+          # Start Colima with sufficient resources and QEMU (VZ can be unstable on CI)
+          colima start --cpu 2 --memory 4 --network-address --vm-type=qemu
           
           # Wait for Docker socket to be ready
           echo "Waiting for Docker socket..."
