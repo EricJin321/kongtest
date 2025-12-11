@@ -6,7 +6,7 @@ on:
 
 jobs:
   manual-ready:
-    runs-on: macos-latest
+    runs-on: macos-13 # Switch to Intel-based macOS for better virtualization stability
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -28,8 +28,8 @@ jobs:
 
       - name: Setup Docker on macOS (Colima)
         run: |
-          # Install Colima, Docker, and Docker Compose
-          brew install colima docker docker-compose
+          # Install Colima, Docker, Docker Compose, and QEMU
+          brew install colima docker docker-compose qemu
           
           # Create docker config directory
           mkdir -p ~/.docker/cli-plugins
@@ -37,9 +37,10 @@ jobs:
           # Link docker-compose plugin
           ln -sfn $(brew --prefix)/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
           
-          # Start Colima with VZ (Native Virtualization) which is preferred for Apple Silicon runners
-          # Removed --network-address to avoid potential networking permission issues in CI
-          colima start --cpu 2 --memory 4 --vm-type=vz --mount-type=virtiofs
+          # Start Colima
+          # Using macos-13 (Intel), QEMU is the standard backend.
+          # We add error logging to see why it fails if it does.
+          colima start --cpu 2 --memory 4 || (cat ~/.colima/_lima/colima/ha.stderr.log; exit 1)
           
           # Wait for Docker socket to be ready
           echo "Waiting for Docker socket..."
