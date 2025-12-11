@@ -80,7 +80,7 @@ You can customize the test run with environment variables:
 ## 🤖 CI/CD
 
 This project uses GitHub Actions for Continuous Integration.
-- **Linux Comprehensive CI**: Runs the full test suite (`test:all`) on every push/dispatch.
+- **Linux Kong Test All**: Runs the full test suite (`test:all`) on every push/dispatch.
 - Artifacts (logs, screenshots, videos) are uploaded upon failure or completion.
 
 ## 📝 Test Coverage
