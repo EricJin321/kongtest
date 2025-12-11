@@ -92,32 +92,41 @@ This project uses GitHub Actions for Continuous Integration.
 ## 📝 Test Coverage
 
 ### UI Tests (`uitest/`)
-- Happy Path are validated in API Tests. This covers corner case of UI Operation and Page jump verification
+Focuses on edge cases for UI operations and page navigation verification, as happy paths are primarily validated via API tests.
+- **Service Creation**: Validates form inputs, error handling, and successful creation.
+- **Route Creation**: Validates route forms, method selection, and error handling.
+- **Navigation**: Verifies sidebar navigation and page redirects.
 
 ### API Tests (`webapitest/`)
-- Validate the Service and Route creation. Run different HTTP/HTTPS combination on created Service and Route to validate its functionality. 
-## Coverage:
-    Service on HTTP endpoint with GET, POST, PUT, DELETE
-    Service on HTTPS endpoint with GET, POST, PUT, DELETE
-    Route on limited Method
-    Route with NoStripPath
-    Route with RegexMatch
-    Route with HTTPS only
-## ToDo:
-    Route with Header and Host limit
-    Service and ROUTE with GRPC/TCP/TLS/UDP/WS/WSS
-    Route with PATCH/OPTIONS/HEAD/CONNECTION/TRACE
-    Route with Priority (Multiple Match)
-    Route with v1 Path handling
-## NeedPlan
-    Security: Auth is not covered yet. Need plan.
-    Security: Need verify it actually sends https.
-    Security: Client Cert and CA Cert configuration
-    Performance: Notice a delay on first request. Need Identify expected Response time
-    Performance: Need Test timeout handling
-    Performance: Need Test Stress and verify request/response buff
-    Compatible: Need setup test on different OS and browser. 
-    Accessibility: Did a quick verify of tab circle and UI with multiple language. Need to make a full test plan. 
+Validates Service and Route creation and functionality by executing various HTTP/HTTPS combinations against the created endpoints.
 
-# Potential Bug
-    Listed in Bug.md
+#### ✅ Current Coverage
+- **Service Operations**: HTTP and HTTPS endpoints supporting GET, POST, PUT, and DELETE methods.
+- **Route Configuration**:
+  - Method restrictions.
+  - `strip_path` behavior (NoStripPath).
+  - Regex path matching.
+  - HTTPS-only routes.
+> **Note**: Testing for Services configured with a specific `path` is currently excluded due to unclear expected behavior regarding path forwarding (see [Bug 1](Bug.md)).
+
+#### 🚧 To-Do
+- **Route Constraints**: Header and Host matching limits.
+- **Protocols**: gRPC, TCP, TLS, UDP, WebSocket (WS/WSS) support for Services and Routes.
+- **Extended Methods**: PATCH, OPTIONS, HEAD, CONNECT, TRACE.
+- **Routing Logic**: Route priority (handling multiple matches) and v1 path handling.
+
+#### 📅 Planning Required
+- **Security**:
+  - Authentication mechanisms (currently uncovered).
+  - Verification of actual HTTPS transmission.
+  - Client Certificate and CA Certificate configuration.
+- **Performance**:
+  - Investigation of initial request latency (cold start).
+  - General request latency report
+  - Timeout handling validation.
+  - Stress testing and request/response buffering verification.
+- **Compatibility**: Cross-OS and cross-browser testing setup.
+- **Accessibility**: Comprehensive audit plan (initial tab cycle and localization checks performed).
+
+## 🐛 Potential Bugs
+Known issues are documented in [Bug.md](Bug.md).

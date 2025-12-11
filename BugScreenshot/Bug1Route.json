@@ -1,0 +1,31 @@
+{
+  "strip_path": true,
+  "name": "AAR",
+  "https_redirect_status_code": 426,
+  "service": {
+    "id": "ba67b5c9-19aa-4e24-8a7a-2c4778fdb5c9"
+  },
+  "paths": [
+    "/"
+  ],
+  "id": "29aeb7e0-571f-46a6-9fa2-3781ef5702c6",
+  "sources": null,
+  "snis": null,
+  "destinations": null,
+  "tags": [],
+  "hosts": null,
+  "response_buffering": true,
+  "path_handling": "v0",
+  "request_buffering": true,
+  "methods": [
+    "GET",
+    "PUT"
+  ],
+  "regex_priority": 0,
+  "protocols": [
+    "http",
+    "https"
+  ],
+  "headers": null,
+  "preserve_host": false
+}

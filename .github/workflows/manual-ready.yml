@@ -26,6 +26,22 @@ jobs:
           node -v
           npm -v
 
+      - name: Setup Docker on macOS (Colima)
+        run: |
+          # Install Colima, Docker, and Docker Compose
+          brew install colima docker docker-compose
+          
+          # Start Colima with sufficient resources
+          colima start --cpu 2 --memory 4 --network-address
+          
+          # Wait for Docker socket to be ready
+          echo "Waiting for Docker socket..."
+          while ! docker info > /dev/null 2>&1; do sleep 1; done
+          
+          # Verify versions
+          docker version
+          docker compose version
+
       - name: Start services with docker-compose
         run: |
           echo "Starting docker-compose from deployment/docker-compose.yml"
