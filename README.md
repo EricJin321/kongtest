@@ -124,5 +124,22 @@ Validates Service and Route creation and functionality by executing various HTTP
 - **Compatibility**: Cross-OS and cross-browser testing setup.
 - **Accessibility**: Comprehensive audit plan (initial tab cycle and localization checks performed manually).
 
+#### 🚫 Not In Scope
+The following features and testing methodologies are explicitly excluded from the current test suite:
+
+- **Kong Features**:
+  - Consumers & Consumer Groups
+  - Plugins (Rate Limiting, Auth, etc.)
+  - Redis Configuration
+  - Upstreams & Targets (Load Balancing)
+  - Certificates, SNIs, Keys, and Vaults
+- **Testing Methodology**:
+  - Unit Testing (Code-level verification)
+  - Whitebox Testing (Internal logic verification)
+- **Service Status Verification**:
+  - Kong Container runtime state monitoring
+  - Direct Kong Container Log verification (outside of Cypress task logs)
+  - Direct Database record verification (Postgres)
+
 ## 🐛 Potential Bugs
 Known issues are documented in [Bug.md](Bug.md).
