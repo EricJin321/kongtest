@@ -7,7 +7,7 @@
   "portPerProtocol": {
     "http": 8000,
     "https": 8443
-  }
-  ,
+  },
+  "logLevel": "INFO",
   "servicePropagationWaitMs": 5000
 }

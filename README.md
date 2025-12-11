@@ -77,12 +77,6 @@ You can customize the test run with environment variables:
 - `ENVIRONMENT`: Sets the target environment config (default: `local`).
 - `TIMEOUT`: Overrides the default request/response timeout (default: `5000`).
 
-Example:
-```bash
-# Run all tests against a staging environment with a 10s timeout
-cross-env ENVIRONMENT=staging TIMEOUT=10000 npm run test:all
-```
-
 ## 🤖 CI/CD
 
 This project uses GitHub Actions for Continuous Integration.
@@ -90,12 +84,14 @@ This project uses GitHub Actions for Continuous Integration.
 - Artifacts (logs, screenshots, videos) are uploaded upon failure or completion.
 
 ## 📝 Test Coverage
+Detailed Automated Test Cases available in [TestDesign.md](TestDesign.md)
 
 ### UI Tests (`uitest/`)
 Focuses on edge cases for UI operations and page navigation verification, as happy paths are primarily validated via API tests.
 - **Service Creation**: Validates form inputs, error handling, and successful creation.
 - **Route Creation**: Validates route forms, method selection, and error handling.
 - **Navigation**: Verifies sidebar navigation and page redirects.
+- **List Verification**: Verifies that created services and routes appear correctly in their respective lists.
 
 ### API Tests (`webapitest/`)
 Validates Service and Route creation and functionality by executing various HTTP/HTTPS combinations against the created endpoints.

@@ -1,5 +1,5 @@
 import KongManager from '../../../utils/kongManager.js';
-import { writeLog } from '../utils/logger.js';
+import { writeLog } from '../../../utils/logger.js';
 
 describe('Comprehensive API Tests', () => {
   const basicTestService = 'BasicTestService';
@@ -13,7 +13,7 @@ describe('Comprehensive API Tests', () => {
 
   // noop test to ensure hooks run visibly in the runner
   it('noop test to allow hooks to run', function () {
-    writeLog('it: noop test');
+    writeLog('it: noop test', 'DEBUG');
   });
 
   after(() => {
