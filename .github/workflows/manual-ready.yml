@@ -1,3 +1,4 @@
+# Only Run with Manual to verify new changes or new pipelines. 
 name: Manual Ready CI
 
 on:

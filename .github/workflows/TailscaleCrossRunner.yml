@@ -1,3 +1,5 @@
+# DO NOT RUN. 
+# A multi agent solution suggested by AI but not verified. 
 name: Tailscale Cross-Runner CI
 
 on:

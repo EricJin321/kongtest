@@ -1,7 +1,15 @@
-# 安装依赖
+# Install dependencies
 install:
 	npm ci
 
-# 运行 Cypress 测试
+# Run all tests (API + UI)
 test: install
-	npm run cypress:run
+	npm run test:all
+
+# Run UI tests only
+test-ui: install
+	npm run test:ui
+
+# Run API comprehensive tests only
+test-api: install
+	npm run test:comprehensive
