@@ -1,3 +1,4 @@
+# Only Run with Manual to verify new changes or new pipelines. 
 name: Manual Ready CI
 
 on:
@@ -5,7 +6,7 @@ on:
 
 jobs:
   manual-ready:
-    runs-on: macos-latest
+    runs-on: macos-13 # Switch to Intel-based macOS for better virtualization stability
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,6 +25,30 @@ jobs:
         run: |
           node -v
           npm -v
+
+      - name: Setup Docker on macOS (Colima)
+        run: |
+          # Install Colima, Docker, Docker Compose, and QEMU
+          brew install colima docker docker-compose qemu
+          
+          # Create docker config directory
+          mkdir -p ~/.docker/cli-plugins
+          
+          # Link docker-compose plugin
+          ln -sfn $(brew --prefix)/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
+          
+          # Start Colima
+          # Using macos-13 (Intel), QEMU is the standard backend.
+          # We add error logging to see why it fails if it does.
+          colima start --cpu 2 --memory 4 || (cat ~/.colima/_lima/colima/ha.stderr.log; exit 1)
+          
+          # Wait for Docker socket to be ready
+          echo "Waiting for Docker socket..."
+          while ! docker info > /dev/null 2>&1; do sleep 1; done
+          
+          # Verify versions
+          docker version
+          docker compose version
 
       - name: Start services with docker-compose
         run: |

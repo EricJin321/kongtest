@@ -1,4 +1,4 @@
-import { writeLog } from '../webapitest/utils/logger.js';
+import { writeLog } from './logger.js';
 import {
   fillInput,
   clickWhenEnabled,
@@ -18,7 +18,7 @@ function createFailHandler(operation, context = '') {
     Cypress.off('fail', failHandler);
     try {
       const msg = context ? `${operation} failed for ${context}` : `${operation} failed`;
-      writeLog(`${msg}: ${err && err.message ? err.message : err}`);
+      writeLog(`${msg}: ${err && err.message ? err.message : err}`, 'ERROR');
     } catch (e) {
       /* ignore logger errors */
     }
@@ -38,7 +38,7 @@ class KongManager {
   static createService(fullUrl, options = {}) {
     const visitUrl = options.visitUrl || 'http://localhost:8002/default/services';
     const requestedName = options.name || null;
-    writeLog('OpenUrl: ' + visitUrl);
+    writeLog('OpenUrl: ' + visitUrl, 'DEBUG');
     
     const failHandler = createFailHandler('KongManager.createService');
     Cypress.on('fail', failHandler);
@@ -59,17 +59,17 @@ class KongManager {
 
     // Verify navigation to the Create Service page occurred
     cy.url({ timeout: 10000 }).should('include', '/default/services/create');
-    writeLog('Navigated to /default/services/create');
+    writeLog('Navigated to /default/services/create', 'DEBUG');
 
     // Fill Full Url
     cy.log(`Filling Full Url: ${fullUrl}`);
-    writeLog(`Filling Full Url: ${fullUrl}`);
+    writeLog(`Filling Full Url: ${fullUrl}`, 'DEBUG');
     fillInput('[data-testid="gateway-service-url-input"]', fullUrl, { scroll: false });
 
     // Optionally fill Name
     if (requestedName) {
       cy.log(`Filling Name: ${requestedName}`);
-      writeLog(`Filling Name: ${requestedName}`);
+      writeLog(`Filling Name: ${requestedName}`, 'DEBUG');
       fillInput('[data-testid="gateway-service-name-input"]', requestedName, { scroll: false });
     }
 
@@ -83,7 +83,7 @@ class KongManager {
       .should('match', guidPathRegex)
       .then((u) => {
         cy.log('Redirect detected to service detail, extracting id');
-        writeLog(`current url after creation: ${u}`);
+        writeLog(`current url after creation: ${u}`, 'DEBUG');
         const parts = u.split('/');
         const id = parts[parts.length - 1];
         writeLog(`Created Kong service ${id}`);
@@ -112,7 +112,7 @@ class KongManager {
     const methodsToSelect = options.methods || [];
     const protocolToSelect = options.protocols || null;
     const httpRedirectCode = options.httpRedirectCode || null;
-    writeLog('OpenUrl: ' + visitUrl);
+    writeLog('OpenUrl: ' + visitUrl, 'DEBUG');
 
     const failHandler = createFailHandler('KongManager.createRoute', `service ${serviceId}`);
     Cypress.on('fail', failHandler);
@@ -189,7 +189,8 @@ class KongManager {
     // After save, return current URL
     cy.log('Save clicked - waiting for redirect after route creation');
     return cy.url({ timeout: 30000 }).then((u) => {
-      writeLog(`current url after route creation: ${u}`);
+      writeLog(`current url after route creation: ${u}`, 'DEBUG');
+      writeLog(`Created Kong route ${routeName}`);
       Cypress.off('fail', failHandler);
       return cy.wrap(u);
     });
@@ -204,6 +205,7 @@ class KongManager {
    */
   static deleteService(serviceName, options = {}) {
     const visitUrl = options.visitUrl || 'http://localhost:8002/default/services';
+    writeLog(`Deleting service ${serviceName}`);
 
     const failHandler = createFailHandler('KongManager.deleteService', serviceName);
     Cypress.on('fail', failHandler);
@@ -211,7 +213,12 @@ class KongManager {
     cy.visit(visitUrl);
 
     // Use helper to find row by name and delete it
-    return findAndDeleteRow('table[data-tableid], table', serviceName).then(() => {
+    return findAndDeleteRow('table[data-tableid], table', serviceName).then((deleted) => {
+      if (deleted) {
+        writeLog(`Deleted service ${serviceName}`);
+      } else {
+        writeLog(`Service ${serviceName} not found for deletion`, 'WARN');
+      }
       Cypress.off('fail', failHandler);
     });
   }
@@ -225,6 +232,7 @@ class KongManager {
    */
   static deleteRoute(routeName, options = {}) {
     const visitUrl = options.visitUrl || 'http://localhost:8002/default/routes';
+    writeLog(`Deleting route ${routeName}`);
 
     const failHandler = createFailHandler('KongManager.deleteRoute', routeName);
     Cypress.on('fail', failHandler);
@@ -233,7 +241,12 @@ class KongManager {
 
     // Use helper to find row by name and delete it
     return findAndDeleteRow('table[data-tableid], table', routeName)
-      .then(() => {
+      .then((deleted) => {
+        if (deleted) {
+          writeLog(`Deleted route ${routeName}`);
+        } else {
+          writeLog(`Route ${routeName} not found for deletion`, 'WARN');
+        }
         Cypress.off('fail', failHandler);
       });
   }

@@ -1,4 +1,4 @@
-import { writeLog } from './logger.js';
+import { writeLog } from '../../utils/logger.js';
 
 /**
  * Send HTTP/HTTPS request

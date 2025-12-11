@@ -65,7 +65,7 @@ describe('HTTPS Redirect Code 302 Test', () => {
 
   it('HTTP request should receive 302 redirect to HTTPS', () => {
     // Use getRedirectApi with followRedirect=false to verify the 302 status without following it
-    ServiceWebApi.getRedirectApi(redirectPath, false, false, 302, null);
+    ServiceWebApi.getHelloApi(redirectPath, false, 302, null);
   });
   
   it('should pass with https', () => {

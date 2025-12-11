@@ -140,10 +140,6 @@ export function findRowByName(tableSelector, name, opts = {}) {
       return nameCell && nameCell.textContent && nameCell.textContent.trim() === name;
     });
     
-    if (!matched) {
-      throw new Error(`Row not found for name: ${name}`);
-    }
-    
     return cy.wrap(matched);
   });
 }
@@ -174,6 +170,10 @@ export function findAndDeleteRow(tableSelector, name, opts = {}) {
   } = opts;
   
   return findRowByName(tableSelector, name, { timeout, nameCellSelector }).then(($matchedRow) => {
+    if (!$matchedRow) {
+      return cy.wrap(false); // Indicate not found/deleted
+    }
+
     // Open row actions dropdown
     cy.wrap($matchedRow)
       .find(rowActionTriggerSelector)
@@ -198,7 +198,7 @@ export function findAndDeleteRow(tableSelector, name, opts = {}) {
       .click({ force: true });
     
     // Wait for row to disappear
-    return cy.contains(nameCellSelector, name, { timeout }).should('not.exist');
+    return cy.contains(nameCellSelector, name, { timeout }).should('not.exist').then(() => true); // Indicate deleted
   });
 }
 
