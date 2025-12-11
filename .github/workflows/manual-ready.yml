@@ -28,10 +28,16 @@ jobs:
 
       - name: Setup Docker on macOS (Colima)
         run: |
-          # Install Colima, Docker, and Docker Compose
-          brew install colima docker docker-compose
+          # Install Colima, Docker, Docker Compose, and QEMU
+          brew install colima docker docker-compose qemu
           
-          # Start Colima with sufficient resources and QEMU (VZ can be unstable on CI)
+          # Create docker config directory
+          mkdir -p ~/.docker/cli-plugins
+          
+          # Link docker-compose plugin
+          ln -sfn $(brew --prefix)/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
+          
+          # Start Colima with sufficient resources and QEMU
           colima start --cpu 2 --memory 4 --network-address --vm-type=qemu
           
           # Wait for Docker socket to be ready
