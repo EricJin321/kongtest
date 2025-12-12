@@ -8,13 +8,13 @@ const getSpecPattern = () => {
   const testSet = process.env.TEST_SET || 'all';
   
     const patterns = {
-    all: '{webapitest/tests/{regexMatchTest.cy.js,basicService.cy.js,httpsService.cy.js,noStripPath.cy.js,methodNotSupport.cy.js,httpBlockTest.cy.js},uitest/tests/{serviceCreationError.cy.js,routeCreationError.cy.js,jumpVerification.cy.js,listVerification.cy.js}}',
+    all: '{webapitest/tests/{regexMatchTest.cy.js,basicService.cy.js,httpsService.cy.js,noStripPath.cy.js,methodNotSupport.cy.js,httpBlockTest.cy.js},uitest/tests/{serviceCreationError.cy.js,routeCreationError.cy.js,jumpVerification.cy.js,listVerification.cy.js,serviceCreationInteration.cy.js}}',
     // comprehensive runs basicService, httpsService and noStripPath specs
     comprehensive: 'webapitest/tests/{regexMatchTest.cy.js,basicService.cy.js,httpsService.cy.js,noStripPath.cy.js,methodNotSupport.cy.js,httpBlockTest.cy.js}',
     // basic runs only basicService spec
-    //comprehensive: 'webapitest/tests/httpBlockTest.js',
+    test: 'uitest/tests/serviceCreationInteration.cy.js',
     basic: 'webapitest/tests/basicService.cy.js',
-    ui: 'uitest/tests/{serviceCreationError.cy.js,routeCreationError.cy.js,jumpVerification.cy.js,listVerification.cy.js}',
+    ui: 'uitest/tests/{serviceCreationError.cy.js,routeCreationError.cy.js,jumpVerification.cy.js,listVerification.cy.js,serviceCreationInteration.cy.js}',
   };
 
   return patterns[testSet] || patterns['all'];

@@ -1,0 +1,212 @@
+import "cypress-real-events/support";
+import { verifyInputTooltip, verifyFieldTooltip } from '../../utils/uiHelpers.js';
+
+describe('Service Creation Interaction', () => {
+  it('should verify tooltips and expand advanced fields in default URL mode', () => {
+    cy.log('Step 1: Visit service creation page');
+    cy.visit('http://localhost:8002/default/services/create');
+
+    cy.log('Step 2: Verify FullUrl tooltip');
+    verifyInputTooltip(
+      'gateway-service-url-input',
+      'This is the URL of the API you will manage in Kong Gateway.'
+    );
+
+    cy.log('Step 3: Verify Name tooltip');
+    verifyInputTooltip(
+      'gateway-service-name-input',
+      'The Service name.'
+    );
+
+    cy.log('Step 4: Verify Retries field does not exist before expanding');
+    cy.get('[data-testid="gateway-service-retries-input"]')
+      .should('not.exist');
+
+    cy.log('Step 5: Click "View advanced fields"');
+    cy.get('[data-testid="collapse-trigger-content"]')
+      .contains('View advanced fields')
+      .scrollIntoView()
+      .should('be.visible')
+      .click();
+    
+    cy.log('Step 6: Verify advanced fields section is visible');
+    cy.get('[data-testid="collapse-hidden-content"]')
+      .should('be.visible');
+
+    cy.log('Step 7: Verify Retries tooltip');
+    verifyInputTooltip(
+      'gateway-service-retries-input',
+      'The number of retries to execute upon failure to proxy.'
+    );
+
+    cy.log('Step 8: Verify Connection timeout tooltip');
+    verifyInputTooltip(
+      'gateway-service-connTimeout-input',
+      'The timeout in milliseconds for establishing a connection to the upstream server.'
+    );
+
+    cy.log('Step 9: Verify Write timeout tooltip');
+    verifyInputTooltip(
+      'gateway-service-writeTimeout-input',
+      'The timeout in milliseconds between two successive write operations for transmitting a request to the upstream server.'
+    );
+
+    cy.log('Step 10: Verify Read timeout tooltip');
+    verifyInputTooltip(
+      'gateway-service-readTimeout-input',
+      'The timeout in milliseconds between two successive read operations for transmitting a request to the upstream server.'
+    );
+
+    cy.log('Step 11: Verify Client certificate tooltip');
+    verifyInputTooltip(
+      'gateway-service-clientCert-input',
+      'Certificate to be used as client certificate while TLS handshaking to the upstream server.'
+    );
+
+    cy.log('Step 12: Verify CA certificates tooltip');
+    verifyInputTooltip(
+      'gateway-service-ca-certs-input',
+      'Array of CA Certificate object UUIDs that are used to build the trust store while verifying upstream server\'s TLS certificate. If set to null when Nginx default is respected. If default CA list in Nginx are not specified and TLS verification is enabled, then handshake with upstream server will always fail (because no CA are trusted).'
+    );
+
+    cy.log('Step 13: Verify TLS verify checkbox tooltip');
+    cy.get('[data-testid="gateway-service-tls-verify-checkbox"]')
+      .scrollIntoView()
+      .parents('.k-checkbox')
+      .first()
+      .then($container => {
+        cy.wrap($container)
+          .find('.checkbox-label .kui-icon.info-icon[data-testid="kui-icon-wrapper-info-icon"]')
+          .should('be.visible')
+          .invoke('attr', 'aria-controls')
+          .then((tooltipId) => {
+            cy.get(`#${tooltipId}`)
+              .should('have.css', 'display', 'none');
+
+            cy.wrap($container)
+              .find('.checkbox-label .kui-icon.info-icon[data-testid="kui-icon-wrapper-info-icon"]')
+              .realHover()
+              .wait(500);
+
+            cy.get(`#${tooltipId}`)
+              .should('not.have.css', 'display', 'none')
+              .should('be.visible')
+              .should('contain.text', 'Whether to enable verification of upstream server TLS certificate. If set to null, then the Nginx default is respected.');
+          });
+      });
+
+    cy.log('Step 14: Verify Tags field is not visible before expanding');
+    cy.get('[data-testid="gateway-service-tags-input"]')
+      .should('not.be.visible');
+
+    cy.log('Step 15: Click "Add tags"');
+    cy.get('[data-testid="tags-collapse"]')
+      .find('[data-testid="collapse-trigger-content"]')
+      .contains('Add tags')
+      .scrollIntoView()
+      .should('be.visible')
+      .click();
+
+    cy.log('Step 16: Verify Tags tooltip');
+    verifyInputTooltip(
+      'gateway-service-tags-input',
+      'An optional set of strings associated with the Service for grouping and filtering.'
+    );
+  });
+});
+
+describe('Service Creation Manual Configuration', () => {
+  it('should verify tooltips in manual configuration mode', () => {
+    cy.log('Step 1: Visit service creation page');
+    cy.visit('http://localhost:8002/default/services/create');
+    
+    cy.log('Step 2: Click manual configuration radio');
+    cy.get('[data-testid="gateway-service-protocol-radio-label"]')
+      .scrollIntoView()
+      .should('be.visible')
+      .click();
+
+    // Wait for the form to update after switching modes
+    cy.get('[data-testid="gateway-service-protocol-select"]')
+      .should('be.visible');
+
+    cy.log('Step 3: Verify Protocol tooltip');
+    verifyFieldTooltip(
+      'gateway-service-protocol-select',
+      'The protocol used to communicate with the upstream.',
+      { isSelect: true }
+    );
+
+    cy.log('Step 4: Verify Host tooltip');
+    verifyFieldTooltip(
+      'gateway-service-host-input',
+      'The host of the upstream server. Note that the host value is case sensitive.'
+    );
+
+    cy.log('Step 5: Verify Path tooltip');
+    verifyFieldTooltip(
+      'gateway-service-path-input',
+      'The path to be used in request to the upstream server.'
+    );
+
+    cy.log('Step 6: Verify Port tooltip');
+    verifyFieldTooltip(
+      'gateway-service-port-input',
+      'The upstream server port.'
+    );
+
+    cy.log('Step 7: Verify Retries field does not exist before expanding');
+    cy.get('[data-testid="gateway-service-retries-input"]')
+      .should('not.exist');
+
+    cy.log('Step 8: Click "View advanced fields"');
+    cy.get('[data-testid="advanced-fields-collapse"]')
+      .find('[data-testid="collapse-trigger-content"]')
+      .contains('View advanced fields')
+      .scrollIntoView()
+      .should('be.visible')
+      .click();
+
+    cy.log('Step 9: Verify Retries tooltip');
+    verifyInputTooltip(
+      'gateway-service-retries-input',
+      'The number of retries to execute upon failure to proxy.'
+    );
+
+    cy.log('Step 10: Verify Connection timeout tooltip');
+    verifyInputTooltip(
+      'gateway-service-connTimeout-input',
+      'The timeout in milliseconds for establishing a connection to the upstream server.'
+    );
+
+    cy.log('Step 11: Verify Write timeout tooltip');
+    verifyInputTooltip(
+      'gateway-service-writeTimeout-input',
+      'The timeout in milliseconds between two successive write operations for transmitting a request to the upstream server.'
+    );
+
+    cy.log('Step 12: Verify Read timeout tooltip');
+    verifyInputTooltip(
+      'gateway-service-readTimeout-input',
+      'The timeout in milliseconds between two successive read operations for transmitting a request to the upstream server.'
+    );
+
+    cy.log('Step 13: Verify Tags field is not visible before expanding');
+    cy.get('[data-testid="gateway-service-tags-input"]')
+      .should('not.be.visible');
+
+    cy.log('Step 14: Click "Add tags"');
+    cy.get('[data-testid="tags-collapse"]')
+      .find('[data-testid="collapse-trigger-content"]')
+      .contains('Add tags')
+      .scrollIntoView()
+      .should('be.visible')
+      .click();
+
+    cy.log('Step 15: Verify Tags tooltip');
+    verifyInputTooltip(
+      'gateway-service-tags-input',
+      'An optional set of strings associated with the Service for grouping and filtering.'
+    );
+  });
+})
