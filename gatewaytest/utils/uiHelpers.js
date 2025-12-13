@@ -19,17 +19,19 @@ export function fillInput(selector, value, opts = {}) {
   const { timeout = 10000, clear = true, scroll = true } = opts;
   
   return cy.get(selector, { timeout }).then(($el) => {
+    let chain = cy.wrap($el);
+    
     if (scroll) {
-      cy.wrap($el).scrollIntoView();
+      chain = chain.scrollIntoView();
     }
     
-    cy.wrap($el).should('be.visible');
+    chain = chain.should('be.visible');
     
     if (clear) {
-      cy.wrap($el).clear();
+      chain = chain.clear();
     }
     
-    cy.wrap($el).type(value);
+    return chain.type(value);
   });
 }
 
@@ -48,14 +50,19 @@ export function clickWhenEnabled(selector, opts = {}) {
   const { timeout = 10000, scroll = true, checkEnabled = true, force = true } = opts;
   
   return cy.get(selector, { timeout }).then(($el) => {
+    let chain = cy.wrap($el);
+    
     if (scroll) {
-      cy.wrap($el).scrollIntoView();
+      chain = chain.scrollIntoView();
     }
-    cy.wrap($el).should('be.visible');
+    
+    chain = chain.should('be.visible');
+    
     if (checkEnabled) {
-      cy.wrap($el).should('be.enabled');
+      chain = chain.should('be.enabled');
     }
-    cy.wrap($el).click({ force });
+    
+    return chain.click({ force });
   });
 }
 
@@ -225,16 +232,11 @@ export function clickSidebarItem(itemName) {
 /**
  * Internal helper to verify tooltip display after finding the container and icon.
  * @private
+ * @param {Function} getIconChain - Function that returns a fresh Cypress chain to the icon element
  */
-function verifyTooltipBehavior($container, iconSelector, expectedTooltipText, hoverWait, useFirst = false) {
-  let iconChain = cy.wrap($container).find(iconSelector);
-  
-  // Apply .first() if needed (for select elements with multiple icons)
-  if (useFirst) {
-    iconChain = iconChain.first();
-  }
-  
-  iconChain
+function verifyTooltipBehavior(getIconChain, expectedTooltipText, hoverWait) {
+  // Get icon and retrieve tooltip ID
+  return getIconChain()
     .scrollIntoView()
     .should('be.visible')
     .invoke('attr', 'aria-controls')
@@ -243,12 +245,8 @@ function verifyTooltipBehavior($container, iconSelector, expectedTooltipText, ho
       cy.get(`#${tooltipId}`)
         .should('have.css', 'display', 'none');
 
-      // Hover over the icon
-      let hoverChain = cy.wrap($container).find(iconSelector);
-      if (useFirst) {
-        hoverChain = hoverChain.first();
-      }
-      hoverChain.realHover().wait(hoverWait);
+      // Hover over the icon - use fresh chain from getter
+      getIconChain().realHover().wait(hoverWait);
 
       // Verify the tooltip appears with the expected text
       cy.get(`#${tooltipId}`)
@@ -261,6 +259,25 @@ function verifyTooltipBehavior($container, iconSelector, expectedTooltipText, ho
       cy.get(`#${tooltipId}`)
         .should('have.css', 'display', 'none');
     });
+}
+
+/**
+ * Expand a collapse section by clicking its trigger.
+ * 
+ * @param {string} triggerSelector - Selector for the trigger element (can use data-testid or CSS selector)
+ * @param {string} triggerText - The text content of the trigger button (e.g., 'View advanced fields', 'Add tags')
+ * @param {object} opts - Options
+ * @param {number} opts.timeout - Timeout in ms (default: 10000)
+ * @returns {Cypress.Chainable}
+ */
+export function expandCollapseSection(triggerSelector, triggerText, opts = {}) {
+  const { timeout = 10000 } = opts;
+  
+  return cy.get(triggerSelector, { timeout })
+    .contains(triggerText)
+    .scrollIntoView()
+    .should('be.visible')
+    .click();
 }
 
 /**
@@ -290,38 +307,45 @@ export function verifyFieldTooltip(fieldSelector, expectedTooltipText, opts = {}
   // Move mouse away first to hide any previous tooltips
   cy.get('body').realHover({ position: 'topLeft' });
   
-  let containerChain = cy.get(`[data-testid="${fieldSelector}"]`);
   let iconSelector = 'label .kui-icon.info-icon[data-testid="kui-icon-wrapper-info-icon"]';
+  let containerSelector = `[data-testid="${fieldSelector}"]`;
+  let containerModifier = null;
   let useFirst = false;
   
   // Configure based on field type
   switch (fieldType) {
     case FieldType.SELECT:
-      containerChain = containerChain.parents('.k-select').first();
+      containerModifier = (chain) => chain.parents('.k-select').first();
       useFirst = true; // Select elements may have multiple icons
       break;
       
     case FieldType.CHECKBOX:
-      containerChain = containerChain.parents('.k-checkbox').first();
+      containerModifier = (chain) => chain.parents('.k-checkbox').first();
       iconSelector = '.checkbox-label .kui-icon.info-icon[data-testid="kui-icon-wrapper-info-icon"]';
       break;
       
     case FieldType.INPUT:
     default:
-      containerChain = containerChain.parent().parent();
+      containerModifier = (chain) => chain.parent().parent();
       break;
   }
   
-  return containerChain
-    .scrollIntoView()
-    .then($container => {
-      verifyTooltipBehavior(
-        $container,
-        iconSelector,
-        expectedTooltipText,
-        hoverWait,
-        useFirst
-      );
-    });
+  // Create a getter function that returns a fresh chain to the icon
+  const getIconChain = () => {
+    let chain = cy.get(containerSelector);
+    if (containerModifier) {
+      chain = containerModifier(chain);
+    }
+    chain = chain.find(iconSelector);
+    if (useFirst) {
+      chain = chain.first();
+    }
+    return chain;
+  };
+  
+  return verifyTooltipBehavior(
+    getIconChain,
+    expectedTooltipText,
+    hoverWait
+  );
 }
-

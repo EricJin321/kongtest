@@ -1,5 +1,5 @@
 import "cypress-real-events/support";
-import { verifyFieldTooltip, FieldType } from '../../utils/uiHelpers.js';
+import { verifyFieldTooltip, FieldType, expandCollapseSection } from '../../utils/uiHelpers.js';
 
 describe('Service Creation Interaction', () => {
   it('should verify tooltips and expand advanced fields in default URL mode', () => {
@@ -24,12 +24,8 @@ describe('Service Creation Interaction', () => {
     cy.get('[data-testid="gateway-service-retries-input"]')
       .should('not.exist');
 
-    cy.log('Step 5: Click "View advanced fields"');
-    cy.get('[data-testid="collapse-trigger-content"]')
-      .contains('View advanced fields')
-      .scrollIntoView()
-      .should('be.visible')
-      .click();
+    cy.log('Step 5: Expand advanced fields section');
+    expandCollapseSection('[data-testid="collapse-trigger-content"]', 'View advanced fields');
     
     cy.log('Step 6: Verify advanced fields section is visible');
     cy.get('[data-testid="collapse-hidden-content"]')
@@ -88,13 +84,8 @@ describe('Service Creation Interaction', () => {
     cy.get('[data-testid="gateway-service-tags-input"]')
       .should('not.be.visible');
 
-    cy.log('Step 15: Click "Add tags"');
-    cy.get('[data-testid="tags-collapse"]')
-      .find('[data-testid="collapse-trigger-content"]')
-      .contains('Add tags')
-      .scrollIntoView()
-      .should('be.visible')
-      .click();
+    cy.log('Step 15: Expand tags section');
+    expandCollapseSection('[data-testid="tags-collapse"] [data-testid="collapse-trigger-content"]', 'Add tags');
 
     cy.log('Step 16: Verify Tags tooltip');
     verifyFieldTooltip(
@@ -152,13 +143,8 @@ describe('Service Creation Manual Configuration', () => {
     cy.get('[data-testid="gateway-service-retries-input"]')
       .should('not.exist');
 
-    cy.log('Step 8: Click "View advanced fields"');
-    cy.get('[data-testid="advanced-fields-collapse"]')
-      .find('[data-testid="collapse-trigger-content"]')
-      .contains('View advanced fields')
-      .scrollIntoView()
-      .should('be.visible')
-      .click();
+    cy.log('Step 8: Expand advanced fields section');
+    expandCollapseSection('[data-testid="advanced-fields-collapse"] [data-testid="collapse-trigger-content"]', 'View advanced fields');
 
     cy.log('Step 9: Verify Retries tooltip');
     verifyFieldTooltip(
@@ -192,13 +178,8 @@ describe('Service Creation Manual Configuration', () => {
     cy.get('[data-testid="gateway-service-tags-input"]')
       .should('not.be.visible');
 
-    cy.log('Step 14: Click "Add tags"');
-    cy.get('[data-testid="tags-collapse"]')
-      .find('[data-testid="collapse-trigger-content"]')
-      .contains('Add tags')
-      .scrollIntoView()
-      .should('be.visible')
-      .click();
+    cy.log('Step 14: Expand tags section');
+    expandCollapseSection('[data-testid="tags-collapse"] [data-testid="collapse-trigger-content"]', 'Add tags');
 
     cy.log('Step 15: Verify Tags tooltip');
     verifyFieldTooltip(
