@@ -89,6 +89,7 @@ Detailed Automated Test Cases available in [TestDesign.md](TestDesign.md)
 ### UI Tests (`uitest/`)
 Focuses on edge cases for UI operations and page navigation verification, as happy paths are primarily validated via API tests.
 - **Service Creation**: Validates form inputs, error handling, and successful creation.
+- **Service Creation Interaction**: Validates tooltip information for all service creation form fields, including advanced fields and tags.
 - **Route Creation**: Validates route forms, method selection, and error handling.
 - **Navigation**: Verifies sidebar navigation and page redirects.
 - **List Verification**: Verifies that created services and routes appear correctly in their respective lists.

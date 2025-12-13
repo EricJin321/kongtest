@@ -81,7 +81,23 @@ These tests verify the functionality and user experience of the Kong Manager int
   - `should show error for invalid Connection Timeout`: Validates numeric constraints.
   - `should fail when creating a service with an existing name`: Verifies unique name constraint.
 
-### 2.2. Route Creation Error Handling (`routeCreationError.cy.js`)
+### 2.2. Service Creation Interaction (`serviceCreationInteration.cy.js`)
+**Objective**: Verify tooltip information display for all service creation form fields.
+- **Default URL Mode Tests**:
+  - Verifies FullUrl and Name field tooltips.
+  - Expands advanced fields section and verifies it was initially collapsed.
+  - Verifies tooltips for: Retries, Connection timeout, Write timeout, Read timeout, Client certificate, CA certificates, and TLS verify checkbox.
+  - Expands tags section and verifies Tags field tooltip.
+- **Manual Configuration Mode Tests**:
+  - Switches to manual configuration mode.
+  - Verifies tooltips for: Protocol, Host, Path, and Port fields.
+  - Expands advanced fields section and verifies tooltips for timeout and retry settings.
+  - Expands tags section and verifies Tags field tooltip.
+- **Validation**:
+  - Verifies that advanced fields and tags sections are properly collapsed before expansion.
+  - Ensures tooltips appear on hover and display correct information text.
+
+### 2.3. Route Creation Error Handling (`routeCreationError.cy.js`)
 **Objective**: Validate form constraints when creating a Route.
 - **Test Cases**:
   - `should show error for invalid Route Name`: Validates name characters.
