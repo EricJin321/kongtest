@@ -89,7 +89,7 @@ These tests verify the functionality and user experience of the Kong Manager int
   - Verifies tooltips for: Retries, Connection timeout, Write timeout, Read timeout, Client certificate, CA certificates, and TLS verify checkbox.
   - Expands tags section and verifies Tags field tooltip.
 - **Manual Configuration Mode Tests**:
-  - Switches to manual configuration mode.
+  - Switches to manual configuration mode (protocol, host, port, path).
   - Verifies tooltips for: Protocol, Host, Path, and Port fields.
   - Expands advanced fields section and verifies tooltips for timeout and retry settings.
   - Expands tags section and verifies Tags field tooltip.
@@ -97,21 +97,31 @@ These tests verify the functionality and user experience of the Kong Manager int
   - Verifies that advanced fields and tags sections are properly collapsed before expansion.
   - Ensures tooltips appear on hover and display correct information text.
 
-### 2.3. Route Creation Error Handling (`routeCreationError.cy.js`)
+### 2.3. Service Boundary Values (`serviceBoundaryValues.cy.js`)
+**Objective**: Test service creation with extreme timeout values and special characters.
+- **Test Cases**:
+  - `should create service with minimum timeout values (1ms)`: Creates service `Boundary_Service-1` with all timeout fields set to 1ms (minimum valid value).
+  - `should create service with maximum timeout values (2147483646ms)`: Creates service `Boundary_Service~1` with all timeout fields set to 2147483646ms (near INT32_MAX).
+- **Validation**:
+  - Verifies service names can include special characters (`.`, `-`, `~`) per Kong's naming rules.
+  - Verifies that extreme timeout values are accepted and the service is successfully created.
+  - Confirms redirect to service detail page after creation.
+
+### 2.4. Route Creation Error Handling (`routeCreationError.cy.js`)
 **Objective**: Validate form constraints when creating a Route.
 - **Test Cases**:
   - `should show error for invalid Route Name`: Validates name characters.
   - `should show error for invalid Path format`: Ensures paths start with `/`.
   - `should fail when creating a route with an existing name`: Verifies unique name constraint.
 
-### 2.3. Sidebar Navigation Verification (`jumpVerification.cy.js`)
+### 2.5. Sidebar Navigation Verification (`jumpVerification.cy.js`)
 **Objective**: Verify navigation flows within Kong Manager.
 - **Test Cases**:
   - `should navigate to Gateway Services and Routes pages`: Verifies sidebar links work.
   - `should navigate to Create Service page and verify creation redirect`: Verifies the full flow from "Create" button to "Service Detail" page.
   - `should navigate to Create Route page from Routes list`: Verifies navigation to route creation.
 
-### 2.4. List Verification (`listVerification.cy.js`)
+### 2.6. List Verification (`listVerification.cy.js`)
 **Objective**: Verify that created entities correctly appear in their respective management lists.
 - **Test Cases**:
   - `should display the created service in the service list`: Creates a service and asserts it is visible in the Services table.

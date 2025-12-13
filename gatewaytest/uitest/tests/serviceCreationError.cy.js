@@ -36,13 +36,13 @@ describe('Service Creation Error Handling', () => {
   it('should show error for invalid Connection Timeout (0)', () => {
     fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://localhost:1080/', { scroll: false });
     // Click "View advanced fields"
-    cy.get('[data-testid="collapse-trigger-label"]')
+    cy.get(SERVICE_SELECTORS.COLLAPSE_TRIGGER_CONTENT)
       .contains('View advanced fields')
       .should('be.visible')
       .click();
     
     // Fill Connection Timeout with 0
-    fillInput('[data-testid="gateway-service-connTimeout-input"]', '0', { scroll: true });
+    fillInput(SERVICE_SELECTORS.CONN_TIMEOUT_INPUT, '0', { scroll: true });
     
     // Click Save
     clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });

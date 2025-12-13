@@ -29,12 +29,27 @@ export const ROUTE_CREATION_ERRORS = {
 // ============================================================================
 
 export const TOOLTIP_STRINGS = {
-  SERVICE_NAME: 'The service name.',
-  SERVICE_URL: 'The URL of the upstream server.',
-  SERVICE_CONNECT_TIMEOUT: 'The timeout in milliseconds for establishing a connection to the upstream server.',
-  SERVICE_WRITE_TIMEOUT: 'The timeout in milliseconds between two successive write operations.',
-  SERVICE_READ_TIMEOUT: 'The timeout in milliseconds between two successive read operations.',
+  // Service - Basic Fields
+  SERVICE_URL: 'This is the URL of the API you will manage in Kong Gateway.',
+  SERVICE_NAME: 'The Service name.',
   
+  // Service - Advanced Fields
+  SERVICE_RETRIES: 'The number of retries to execute upon failure to proxy.',
+  SERVICE_CONN_TIMEOUT: 'The timeout in milliseconds for establishing a connection to the upstream server.',
+  SERVICE_WRITE_TIMEOUT: 'The timeout in milliseconds between two successive write operations for transmitting a request to the upstream server.',
+  SERVICE_READ_TIMEOUT: 'The timeout in milliseconds between two successive read operations for transmitting a request to the upstream server.',
+  SERVICE_CLIENT_CERT: 'Certificate to be used as client certificate while TLS handshaking to the upstream server.',
+  SERVICE_CA_CERTS: 'Array of CA Certificate object UUIDs that are used to build the trust store while verifying upstream server\'s TLS certificate. If set to null when Nginx default is respected. If default CA list in Nginx are not specified and TLS verification is enabled, then handshake with upstream server will always fail (because no CA are trusted).',
+  SERVICE_TLS_VERIFY: 'Whether to enable verification of upstream server TLS certificate. If set to null, then the Nginx default is respected.',
+  SERVICE_TAGS: 'An optional set of strings associated with the Service for grouping and filtering.',
+  
+  // Service - Manual Configuration Mode
+  SERVICE_PROTOCOL: 'The protocol used to communicate with the upstream.',
+  SERVICE_HOST: 'The host of the upstream server. Note that the host value is case sensitive.',
+  SERVICE_PATH: 'The path to be used in request to the upstream server.',
+  SERVICE_PORT: 'The upstream server port.',
+  
+  // Route Fields
   ROUTE_NAME: 'The route name.',
   ROUTE_PATH: 'The path(s) to match for the route.',
   ROUTE_METHODS: 'A list of HTTP methods that match this route.',

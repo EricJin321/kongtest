@@ -5,6 +5,7 @@
  */
 
 import { writeLog } from './logger.js';
+import { TIMEOUTS, COMMON_SELECTORS } from './constants.js';
 
 /**
  * Get configuration value from Cypress environment
@@ -23,18 +24,19 @@ export const Config = {
 
 /**
  * Fill an input field with a value.
- * Ensures visibility, optionally scrolls into view, clears existing content, and types new value.
+ * Ensures visibility, optionally scrolls into view, selects all existing content, and types new value.
+ * Using selectAll before typing ensures the new value replaces any auto-filled default values.
  * 
  * @param {string} selector - CSS selector for the input element
  * @param {string} value - Value to type into the input
  * @param {object} opts - Options
  * @param {number} opts.timeout - Timeout in ms (default: 10000)
- * @param {boolean} opts.clear - Whether to clear existing content first (default: true)
+ * @param {boolean} opts.clear - Whether to select all content first (default: true)
  * @param {boolean} opts.scroll - Whether to scroll into view first (default: true)
  * @returns {Cypress.Chainable}
  */
 export function fillInput(selector, value, opts = {}) {
-  const { timeout = 10000, clear = true, scroll = true } = opts;
+  const { timeout = TIMEOUTS.DEFAULT, clear = true, scroll = true } = opts;
   
   return cy.get(selector, { timeout }).then(($el) => {
     let chain = cy.wrap($el);
@@ -46,7 +48,9 @@ export function fillInput(selector, value, opts = {}) {
     chain = chain.should('be.visible');
     
     if (clear) {
-      chain = chain.clear();
+      // Use {selectall} to select existing content, then type to replace it
+      // This handles inputs that auto-fill default values after clearing
+      chain = chain.type('{selectall}');
     }
     
     return chain.type(value);
@@ -65,7 +69,7 @@ export function fillInput(selector, value, opts = {}) {
  * @returns {Cypress.Chainable}
  */
 export function clickWhenEnabled(selector, opts = {}) {
-  const { timeout = 10000, scroll = true, checkEnabled = true, force = false } = opts;
+  const { timeout = TIMEOUTS.DEFAULT, scroll = true, checkEnabled = true, force = false } = opts;
   
   return cy.get(selector, { timeout }).then(($el) => {
     let chain = cy.wrap($el);
@@ -96,7 +100,7 @@ export function clickWhenEnabled(selector, opts = {}) {
  * @returns {Cypress.Chainable}
  */
 export function selectDropdownItem(inputSelector, itemValue, opts = {}) {
-  const { timeout = 10000, itemLabelSelector = 'span.select-item-label' } = opts;
+  const { timeout = TIMEOUTS.DEFAULT, itemLabelSelector = 'span.select-item-label' } = opts;
   
   // Open the dropdown
   cy.get(inputSelector, { timeout })
@@ -122,7 +126,7 @@ export function selectDropdownItem(inputSelector, itemValue, opts = {}) {
  * @returns {Cypress.Chainable}
  */
 export function selectMultiselectItems(opener, items = [], opts = {}) {
-  const { timeout = 10000, itemTestidPrefix = 'multiselect-item-' } = opts;
+  const { timeout = TIMEOUTS.DEFAULT, itemTestidPrefix = 'multiselect-item-' } = opts;
   
   // Open the multiselect - ensure visible first for retry mechanism
   opener()
@@ -132,7 +136,7 @@ export function selectMultiselectItems(opener, items = [], opts = {}) {
   // Select each item using cy.wrap().each() to maintain proper async chaining
   cy.wrap(items).each((item) => {
     // Type item name in the search input to filter and ensure item is visible
-    cy.get('input[data-testid="multiselect-dropdown-input"]', { timeout })
+    cy.get(COMMON_SELECTORS.MULTISELECT_DROPDOWN_INPUT, { timeout })
       .should('be.visible')
       .clear()
       .type(item);
@@ -161,7 +165,7 @@ export function selectMultiselectItems(opener, items = [], opts = {}) {
  * @returns {Cypress.Chainable}
  */
 export function ensureCheckbox(selector, checked = true, opts = {}) {
-  const { timeout = 10000 } = opts;
+  const { timeout = TIMEOUTS.DEFAULT } = opts;
   
   return cy.get(selector, { timeout }).then(($inp) => {
     // Check current state (support both native checked property and aria-checked attribute)
@@ -187,7 +191,7 @@ export function ensureCheckbox(selector, checked = true, opts = {}) {
  * @returns {Cypress.Chainable<JQuery>} The matched row element
  */
 export function findRowByName(tableSelector, name, opts = {}) {
-  const { timeout = 15000, nameCellSelector = 'td[data-testid="name"] b' } = opts;
+  const { timeout = TIMEOUTS.TABLE_OPERATION, nameCellSelector = COMMON_SELECTORS.NAME_CELL } = opts;
   
   return cy.get(tableSelector, { timeout }).then(($tables) => {
     const $table = $tables.first()[0];
@@ -221,12 +225,12 @@ export function findRowByName(tableSelector, name, opts = {}) {
  */
 export function findAndDeleteRow(tableSelector, name, opts = {}) {
   const {
-    timeout = 15000,
-    nameCellSelector = 'td[data-testid="name"] b',
-    rowActionTriggerSelector = 'button[data-testid="row-actions-dropdown-trigger"]',
-    deleteActionSelector = 'button[data-testid="action-entity-delete"]',
-    confirmationInputSelector = 'input[data-testid="confirmation-input"]',
-    modalActionButtonSelector = 'button[data-testid="modal-action-button"]'
+    timeout = TIMEOUTS.TABLE_OPERATION,
+    nameCellSelector = COMMON_SELECTORS.NAME_CELL,
+    rowActionTriggerSelector = COMMON_SELECTORS.ROW_ACTIONS_TRIGGER,
+    deleteActionSelector = COMMON_SELECTORS.ACTION_ENTITY_DELETE,
+    confirmationInputSelector = COMMON_SELECTORS.CONFIRMATION_INPUT,
+    modalActionButtonSelector = COMMON_SELECTORS.MODAL_ACTION_BUTTON
   } = opts;
   
   return findRowByName(tableSelector, name, { timeout, nameCellSelector }).then(($matchedRow) => {
@@ -241,19 +245,19 @@ export function findAndDeleteRow(tableSelector, name, opts = {}) {
       .click();
     
     // Click delete action
-    cy.get(deleteActionSelector, { timeout: 10000 })
+    cy.get(deleteActionSelector, { timeout: TIMEOUTS.DEFAULT })
       .filter(':visible')
       .first()
       .click();
     
     // Type confirmation name
-    cy.get(confirmationInputSelector, { timeout: 10000 })
+    cy.get(confirmationInputSelector, { timeout: TIMEOUTS.DEFAULT })
       .should('be.visible')
       .clear()
       .type(name);
     
     // Confirm deletion
-    cy.get(modalActionButtonSelector, { timeout: 10000 })
+    cy.get(modalActionButtonSelector, { timeout: TIMEOUTS.DEFAULT })
       .should('not.be.disabled')
       .click();
     
@@ -270,13 +274,13 @@ export function findAndDeleteRow(tableSelector, name, opts = {}) {
 export function clickSidebarItem(itemName) {
   // Wait for DOM to stabilize after navigation
   // TODO: Need a signal that toggle button is clickable. 
-  cy.wait(1000);
+  cy.wait(TIMEOUTS.DOM_STABILIZE);
   cy.get('body').then(($body) => {
     const toggle = $body.find('.sidebar-menu-toggle');
     if (toggle.length > 0 && toggle.is(':visible')) {
       cy.wrap(toggle).click();
       // TODO: need a signal waiting for sidebar animation to complete
-      cy.wait(500);
+      cy.wait(TIMEOUTS.SIDEBAR_ANIMATION);
     }
   });
   
@@ -325,7 +329,7 @@ function verifyTooltipBehavior(getIconChain, expectedTooltipText, hoverWait) {
  * @returns {Cypress.Chainable}
  */
 export function expandCollapseSection(triggerSelector, triggerText, opts = {}) {
-  const { timeout = 10000 } = opts;
+  const { timeout = TIMEOUTS.DEFAULT } = opts;
   
   return cy.get(triggerSelector, { timeout })
     .contains(triggerText)
@@ -356,12 +360,12 @@ export const FieldType = {
  * @returns {Cypress.Chainable}
  */
 export function verifyFieldTooltip(fieldSelector, expectedTooltipText, opts = {}) {
-  const { hoverWait = 500, fieldType = FieldType.INPUT } = opts;
+  const { hoverWait = TIMEOUTS.HOVER_WAIT, fieldType = FieldType.INPUT } = opts;
   
   // Move mouse away first to hide any previous tooltips
   cy.get('body').realHover({ position: 'topLeft' });
   
-  let iconSelector = 'label .kui-icon.info-icon[data-testid="kui-icon-wrapper-info-icon"]';
+  let iconSelector = COMMON_SELECTORS.INFO_ICON;
   let containerSelector = `[data-testid="${fieldSelector}"]`;
   let containerModifier = null;
   let useFirst = false;
@@ -369,13 +373,13 @@ export function verifyFieldTooltip(fieldSelector, expectedTooltipText, opts = {}
   // Configure based on field type
   switch (fieldType) {
     case FieldType.SELECT:
-      containerModifier = (chain) => chain.parents('.k-select').first();
+      containerModifier = (chain) => chain.parents(COMMON_SELECTORS.SELECT_CONTAINER).first();
       useFirst = true; // Select elements may have multiple icons
       break;
       
     case FieldType.CHECKBOX:
-      containerModifier = (chain) => chain.parents('.k-checkbox').first();
-      iconSelector = '.checkbox-label .kui-icon.info-icon[data-testid="kui-icon-wrapper-info-icon"]';
+      containerModifier = (chain) => chain.parents(COMMON_SELECTORS.CHECKBOX_CONTAINER).first();
+      iconSelector = COMMON_SELECTORS.CHECKBOX_INFO_ICON;
       break;
       
     case FieldType.INPUT:

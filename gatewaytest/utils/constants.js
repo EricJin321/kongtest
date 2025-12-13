@@ -16,9 +16,41 @@ export const SERVICE_SELECTORS = {
   URL_INPUT: '[data-testid="gateway-service-url-input"]',
   NAME_INPUT: '[data-testid="gateway-service-name-input"]',
   SUBMIT_BUTTON: '[data-testid="service-create-form-submit"]',
+  COLLAPSE_TRIGGER_CONTENT: '[data-testid="collapse-trigger-content"]',
+  RETRIES_INPUT: '[data-testid="gateway-service-retries-input"]',
+  CONN_TIMEOUT_INPUT: '[data-testid="gateway-service-connTimeout-input"]',
+  WRITE_TIMEOUT_INPUT: '[data-testid="gateway-service-writeTimeout-input"]',
+  READ_TIMEOUT_INPUT: '[data-testid="gateway-service-readTimeout-input"]',
+  TAGS_INPUT: '[data-testid="gateway-service-tags-input"]',
+  PROTOCOL_RADIO_LABEL: '[data-testid="gateway-service-protocol-radio-label"]',
+  PROTOCOL_SELECT: '[data-testid="gateway-service-protocol-select"]',
+  HOST_INPUT: '[data-testid="gateway-service-host-input"]',
+  PATH_INPUT: '[data-testid="gateway-service-path-input"]',
+  PORT_INPUT: '[data-testid="gateway-service-port-input"]',
+  CLIENT_CERT_INPUT: '[data-testid="gateway-service-clientCert-input"]',
+  CA_CERTS_INPUT: '[data-testid="gateway-service-ca-certs-input"]',
+  TLS_VERIFY_CHECKBOX: '[data-testid="gateway-service-tls-verify-checkbox"]',
   
   // Service Detail Page
   ADD_ROUTE_BUTTON: 'button.add-route-btn',
+};
+
+// Service field test IDs (for verifyFieldTooltip function which wraps them internally)
+export const SERVICE_FIELD_TESTIDS = {
+  URL_INPUT: 'gateway-service-url-input',
+  NAME_INPUT: 'gateway-service-name-input',
+  RETRIES_INPUT: 'gateway-service-retries-input',
+  CONN_TIMEOUT_INPUT: 'gateway-service-connTimeout-input',
+  WRITE_TIMEOUT_INPUT: 'gateway-service-writeTimeout-input',
+  READ_TIMEOUT_INPUT: 'gateway-service-readTimeout-input',
+  CLIENT_CERT_INPUT: 'gateway-service-clientCert-input',
+  CA_CERTS_INPUT: 'gateway-service-ca-certs-input',
+  TLS_VERIFY_CHECKBOX: 'gateway-service-tls-verify-checkbox',
+  TAGS_INPUT: 'gateway-service-tags-input',
+  PROTOCOL_SELECT: 'gateway-service-protocol-select',
+  HOST_INPUT: 'gateway-service-host-input',
+  PATH_INPUT: 'gateway-service-path-input',
+  PORT_INPUT: 'gateway-service-port-input',
 };
 
 // ============================================================================
@@ -62,6 +94,45 @@ export const TABLE_SELECTORS = {
 
 export const SIDEBAR_SELECTORS = {
   MENU_ITEM: 'a.sidebar-item',
+};
+
+// ============================================================================
+// Common UI Component Selectors
+// ============================================================================
+
+export const COMMON_SELECTORS = {
+  // Multiselect Dropdown
+  MULTISELECT_DROPDOWN_INPUT: 'input[data-testid="multiselect-dropdown-input"]',
+  
+  // Modal/Dialog
+  MODAL_CONFIRM_BUTTON: 'button[data-testid="modal-confirm-button"]',
+  MODAL_ACTION_BUTTON: 'button[data-testid="modal-action-button"]',
+  CONFIRMATION_INPUT: 'input[data-testid="confirmation-input"]',
+  
+  // Table Actions
+  NAME_CELL: 'td[data-testid="name"] b',
+  ROW_ACTIONS_TRIGGER: 'button[data-testid="row-actions-dropdown-trigger"]',
+  ACTION_ENTITY_DELETE: 'button[data-testid="action-entity-delete"]',
+  
+  // Tooltip
+  INFO_ICON: 'label .kui-icon.info-icon[data-testid="kui-icon-wrapper-info-icon"]',
+  CHECKBOX_INFO_ICON: '.checkbox-label .kui-icon.info-icon[data-testid="kui-icon-wrapper-info-icon"]',
+  
+  // Form Field Containers
+  SELECT_CONTAINER: '.k-select',
+  CHECKBOX_CONTAINER: '.k-checkbox',
+};
+
+// ============================================================================
+// Timeout Constants (in milliseconds)
+// ============================================================================
+
+export const TIMEOUTS = {
+  DEFAULT: 10000,
+  TABLE_OPERATION: 15000,
+  HOVER_WAIT: 500,
+  SIDEBAR_ANIMATION: 500,
+  DOM_STABILIZE: 1000,
 };
 
 // ============================================================================

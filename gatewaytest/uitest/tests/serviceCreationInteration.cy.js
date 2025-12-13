@@ -6,7 +6,8 @@
 
 import "cypress-real-events/support";
 import { verifyFieldTooltip, FieldType, expandCollapseSection } from '../../utils/uiHelpers.js';
-import { SERVICE_SELECTORS, URL_PATHS } from '../../utils/constants.js';
+import { SERVICE_SELECTORS, SERVICE_FIELD_TESTIDS, URL_PATHS } from '../../utils/constants.js';
+import { TOOLTIP_STRINGS } from '../utils/errorCode.js';
 
 describe('Service Creation Interaction', () => {
   beforeEach(() => {
@@ -20,20 +21,20 @@ describe('Service Creation Interaction', () => {
   it('should verify tooltips and expand advanced fields in default URL mode', () => {
     cy.log('Step 1: Verify FullUrl tooltip');
     verifyFieldTooltip(
-      'gateway-service-url-input',
-      'This is the URL of the API you will manage in Kong Gateway.',
+      SERVICE_FIELD_TESTIDS.URL_INPUT,
+      TOOLTIP_STRINGS.SERVICE_URL,
       { fieldType: FieldType.INPUT }
     );
 
     cy.log('Step 2: Verify Name tooltip');
     verifyFieldTooltip(
-      'gateway-service-name-input',
-      'The Service name.',
+      SERVICE_FIELD_TESTIDS.NAME_INPUT,
+      TOOLTIP_STRINGS.SERVICE_NAME,
       { fieldType: FieldType.INPUT }
     );
 
     cy.log('Step 3: Verify Retries field does not exist before expanding');
-    cy.get('[data-testid="gateway-service-retries-input"]')
+    cy.get(SERVICE_SELECTORS.RETRIES_INPUT)
       .should('not.exist');
 
     cy.log('Step 4: Expand advanced fields section');
@@ -45,55 +46,55 @@ describe('Service Creation Interaction', () => {
 
     cy.log('Step 6: Verify Retries tooltip');
     verifyFieldTooltip(
-      'gateway-service-retries-input',
-      'The number of retries to execute upon failure to proxy.',
+      SERVICE_FIELD_TESTIDS.RETRIES_INPUT,
+      TOOLTIP_STRINGS.SERVICE_RETRIES,
       { fieldType: FieldType.INPUT }
     );
 
     cy.log('Step 7: Verify Connection timeout tooltip');
     verifyFieldTooltip(
-      'gateway-service-connTimeout-input',
-      'The timeout in milliseconds for establishing a connection to the upstream server.',
+      SERVICE_FIELD_TESTIDS.CONN_TIMEOUT_INPUT,
+      TOOLTIP_STRINGS.SERVICE_CONN_TIMEOUT,
       { fieldType: FieldType.INPUT }
     );
 
     cy.log('Step 8: Verify Write timeout tooltip');
     verifyFieldTooltip(
-      'gateway-service-writeTimeout-input',
-      'The timeout in milliseconds between two successive write operations for transmitting a request to the upstream server.',
+      SERVICE_FIELD_TESTIDS.WRITE_TIMEOUT_INPUT,
+      TOOLTIP_STRINGS.SERVICE_WRITE_TIMEOUT,
       { fieldType: FieldType.INPUT }
     );
 
     cy.log('Step 9: Verify Read timeout tooltip');
     verifyFieldTooltip(
-      'gateway-service-readTimeout-input',
-      'The timeout in milliseconds between two successive read operations for transmitting a request to the upstream server.',
+      SERVICE_FIELD_TESTIDS.READ_TIMEOUT_INPUT,
+      TOOLTIP_STRINGS.SERVICE_READ_TIMEOUT,
       { fieldType: FieldType.INPUT }
     );
 
     cy.log('Step 10: Verify Client certificate tooltip');
     verifyFieldTooltip(
-      'gateway-service-clientCert-input',
-      'Certificate to be used as client certificate while TLS handshaking to the upstream server.',
+      SERVICE_FIELD_TESTIDS.CLIENT_CERT_INPUT,
+      TOOLTIP_STRINGS.SERVICE_CLIENT_CERT,
       { fieldType: FieldType.INPUT }
     );
 
     cy.log('Step 11: Verify CA certificates tooltip');
     verifyFieldTooltip(
-      'gateway-service-ca-certs-input',
-      'Array of CA Certificate object UUIDs that are used to build the trust store while verifying upstream server\'s TLS certificate. If set to null when Nginx default is respected. If default CA list in Nginx are not specified and TLS verification is enabled, then handshake with upstream server will always fail (because no CA are trusted).',
+      SERVICE_FIELD_TESTIDS.CA_CERTS_INPUT,
+      TOOLTIP_STRINGS.SERVICE_CA_CERTS,
       { fieldType: FieldType.INPUT }
     );
 
     cy.log('Step 12: Verify TLS verify checkbox tooltip');
     verifyFieldTooltip(
-      'gateway-service-tls-verify-checkbox',
-      'Whether to enable verification of upstream server TLS certificate. If set to null, then the Nginx default is respected.',
+      SERVICE_FIELD_TESTIDS.TLS_VERIFY_CHECKBOX,
+      TOOLTIP_STRINGS.SERVICE_TLS_VERIFY,
       { fieldType: FieldType.CHECKBOX }
     );
 
     cy.log('Step 13: Verify Tags field is not visible before expanding');
-    cy.get('[data-testid="gateway-service-tags-input"]')
+    cy.get(SERVICE_SELECTORS.TAGS_INPUT)
       .should('not.be.visible');
 
     cy.log('Step 14: Expand tags section');
@@ -101,8 +102,8 @@ describe('Service Creation Interaction', () => {
 
     cy.log('Step 15: Verify Tags tooltip');
     verifyFieldTooltip(
-      'gateway-service-tags-input',
-      'An optional set of strings associated with the Service for grouping and filtering.',
+      SERVICE_FIELD_TESTIDS.TAGS_INPUT,
+      TOOLTIP_STRINGS.SERVICE_TAGS,
       { fieldType: FieldType.INPUT }
     );
   });
@@ -118,45 +119,45 @@ describe('Service Creation Manual Configuration', () => {
 
   it('should verify tooltips in manual configuration mode', () => {
     cy.log('Step 1: Click manual configuration radio');
-    cy.get('[data-testid="gateway-service-protocol-radio-label"]')
+    cy.get(SERVICE_SELECTORS.PROTOCOL_RADIO_LABEL)
       .scrollIntoView()
       .should('be.visible')
       .click();
 
     // Wait for the form to update after switching modes
-    cy.get('[data-testid="gateway-service-protocol-select"]')
+    cy.get(SERVICE_SELECTORS.PROTOCOL_SELECT)
       .should('be.visible');
 
     cy.log('Step 2: Verify Protocol tooltip');
     verifyFieldTooltip(
-      'gateway-service-protocol-select',
-      'The protocol used to communicate with the upstream.',
+      SERVICE_FIELD_TESTIDS.PROTOCOL_SELECT,
+      TOOLTIP_STRINGS.SERVICE_PROTOCOL,
       { fieldType: FieldType.SELECT }
     );
 
     cy.log('Step 3: Verify Host tooltip');
     verifyFieldTooltip(
-      'gateway-service-host-input',
-      'The host of the upstream server. Note that the host value is case sensitive.',
+      SERVICE_FIELD_TESTIDS.HOST_INPUT,
+      TOOLTIP_STRINGS.SERVICE_HOST,
       { fieldType: FieldType.INPUT }
     );
 
     cy.log('Step 4: Verify Path tooltip');
     verifyFieldTooltip(
-      'gateway-service-path-input',
-      'The path to be used in request to the upstream server.',
+      SERVICE_FIELD_TESTIDS.PATH_INPUT,
+      TOOLTIP_STRINGS.SERVICE_PATH,
       { fieldType: FieldType.INPUT }
     );
 
     cy.log('Step 5: Verify Port tooltip');
     verifyFieldTooltip(
-      'gateway-service-port-input',
-      'The upstream server port.',
+      SERVICE_FIELD_TESTIDS.PORT_INPUT,
+      TOOLTIP_STRINGS.SERVICE_PORT,
       { fieldType: FieldType.INPUT }
     );
 
     cy.log('Step 6: Verify Retries field does not exist before expanding');
-    cy.get('[data-testid="gateway-service-retries-input"]')
+    cy.get(SERVICE_SELECTORS.RETRIES_INPUT)
       .should('not.exist');
 
     cy.log('Step 7: Expand advanced fields section');
@@ -164,34 +165,34 @@ describe('Service Creation Manual Configuration', () => {
 
     cy.log('Step 8: Verify Retries tooltip');
     verifyFieldTooltip(
-      'gateway-service-retries-input',
-      'The number of retries to execute upon failure to proxy.',
+      SERVICE_FIELD_TESTIDS.RETRIES_INPUT,
+      TOOLTIP_STRINGS.SERVICE_RETRIES,
       { fieldType: FieldType.INPUT }
     );
 
-    cy.log('Step 10: Verify Connection timeout tooltip');
+    cy.log('Step 9: Verify Connection timeout tooltip');
     verifyFieldTooltip(
-      'gateway-service-connTimeout-input',
-      'The timeout in milliseconds for establishing a connection to the upstream server.',
+      SERVICE_FIELD_TESTIDS.CONN_TIMEOUT_INPUT,
+      TOOLTIP_STRINGS.SERVICE_CONN_TIMEOUT,
       { fieldType: FieldType.INPUT }
     );
 
     cy.log('Step 11: Verify Write timeout tooltip');
     verifyFieldTooltip(
-      'gateway-service-writeTimeout-input',
-      'The timeout in milliseconds between two successive write operations for transmitting a request to the upstream server.',
+      SERVICE_FIELD_TESTIDS.WRITE_TIMEOUT_INPUT,
+      TOOLTIP_STRINGS.SERVICE_WRITE_TIMEOUT,
       { fieldType: FieldType.INPUT }
     );
 
     cy.log('Step 11: Verify Read timeout tooltip');
     verifyFieldTooltip(
-      'gateway-service-readTimeout-input',
-      'The timeout in milliseconds between two successive read operations for transmitting a request to the upstream server.',
+      SERVICE_FIELD_TESTIDS.READ_TIMEOUT_INPUT,
+      TOOLTIP_STRINGS.SERVICE_READ_TIMEOUT,
       { fieldType: FieldType.INPUT }
     );
 
     cy.log('Step 12: Verify Tags field is not visible before expanding');
-    cy.get('[data-testid="gateway-service-tags-input"]')
+    cy.get(SERVICE_SELECTORS.TAGS_INPUT)
       .should('not.be.visible');
 
     cy.log('Step 13: Expand tags section');
@@ -199,9 +200,9 @@ describe('Service Creation Manual Configuration', () => {
 
     cy.log('Step 14: Verify Tags tooltip');
     verifyFieldTooltip(
-      'gateway-service-tags-input',
-      'An optional set of strings associated with the Service for grouping and filtering.',
+      SERVICE_FIELD_TESTIDS.TAGS_INPUT,
+      TOOLTIP_STRINGS.SERVICE_TAGS,
       { fieldType: FieldType.INPUT }
     );
   });
-})
+});
