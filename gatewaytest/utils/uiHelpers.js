@@ -223,149 +223,105 @@ export function clickSidebarItem(itemName) {
 }
 
 /**
- * Verify tooltip for an input field's info icon.
- * Finds the input field, locates its info icon, and verifies the tooltip appears with expected text.
- * 
- * @param {string} inputSelector - data-testid selector for the input element (e.g., 'gateway-service-url-input')
- * @param {string} expectedTooltipText - The expected text content of the tooltip
- * @param {object} opts - Options
- * @param {number} opts.hoverWait - Time to wait after hovering (default: 500ms)
- * @returns {Cypress.Chainable}
+ * Internal helper to verify tooltip display after finding the container and icon.
+ * @private
  */
-export function verifyInputTooltip(inputSelector, expectedTooltipText, opts = {}) {
-  const { hoverWait = 500 } = opts;
+function verifyTooltipBehavior($container, iconSelector, expectedTooltipText, hoverWait, useFirst = false) {
+  let iconChain = cy.wrap($container).find(iconSelector);
   
-  // Move mouse away first to hide any previous tooltips
-  cy.get('body').realHover({ position: 'topLeft' });
+  // Apply .first() if needed (for select elements with multiple icons)
+  if (useFirst) {
+    iconChain = iconChain.first();
+  }
   
-  return cy.get(`[data-testid="${inputSelector}"]`)
-    .parent()
-    .parent()
+  iconChain
     .scrollIntoView()
-    .then($container => {
-      // Find the info icon and get its associated tooltip ID
-      cy.wrap($container)
-        .find('label .kui-icon.info-icon[data-testid="kui-icon-wrapper-info-icon"]')
-        .scrollIntoView()
+    .should('be.visible')
+    .invoke('attr', 'aria-controls')
+    .then((tooltipId) => {
+      // Verify the tooltip is initially hidden
+      cy.get(`#${tooltipId}`)
+        .should('have.css', 'display', 'none');
+
+      // Hover over the icon
+      let hoverChain = cy.wrap($container).find(iconSelector);
+      if (useFirst) {
+        hoverChain = hoverChain.first();
+      }
+      hoverChain.realHover().wait(hoverWait);
+
+      // Verify the tooltip appears with the expected text
+      cy.get(`#${tooltipId}`)
+        .should('not.have.css', 'display', 'none')
         .should('be.visible')
-        .invoke('attr', 'aria-controls')
-        .then((tooltipId) => {
-          // Verify the tooltip is initially hidden (use cy.get from root)
-          cy.get(`#${tooltipId}`)
-            .should('have.css', 'display', 'none');
-
-          // Hover over the icon
-          cy.wrap($container)
-            .find('label .kui-icon.info-icon[data-testid="kui-icon-wrapper-info-icon"]')
-            .realHover()
-            .wait(hoverWait);
-
-          // Verify the tooltip appears with the expected text (use cy.get from root)
-          cy.get(`#${tooltipId}`)
-            .should('not.have.css', 'display', 'none')
-            .should('be.visible')
-            .should('contain.text', expectedTooltipText);
-          
-          // Move mouse away to hide the tooltip for next verification
-          cy.get('body').realHover({ position: 'topLeft' });
-          cy.get(`#${tooltipId}`)
-            .should('have.css', 'display', 'none');
-        });
+        .should('contain.text', expectedTooltipText);
+      
+      // Move mouse away to hide the tooltip for next verification
+      cy.get('body').realHover({ position: 'topLeft' });
+      cy.get(`#${tooltipId}`)
+        .should('have.css', 'display', 'none');
     });
 }
 
+/**
+ * Field types for tooltip verification
+ * @enum {string}
+ */
+export const FieldType = {
+  INPUT: 'input',       // Standard input field (needs .parent().parent())
+  SELECT: 'select',     // Select dropdown (needs .parents('.k-select'))
+  CHECKBOX: 'checkbox'  // Checkbox field (needs .parents('.k-checkbox'))
+};
 
 /**
- * Verify tooltip for a field's info icon by finding the field using data-testid.
- * Works with input, select, and other form elements.
+ * Verify tooltip for a form field's info icon.
+ * Works with input, select, checkbox, and other form elements.
  * 
- * @param {string} fieldTestId - data-testid value for the field element (e.g., 'gateway-service-protocol-select')
+ * @param {string} fieldSelector - data-testid selector for the field element
  * @param {string} expectedTooltipText - The expected text content of the tooltip
  * @param {object} opts - Options
  * @param {number} opts.hoverWait - Time to wait after hovering (default: 500ms)
- * @param {boolean} opts.isSelect - Whether the field is a select element (default: false)
+ * @param {FieldType} opts.fieldType - Type of field (default: FieldType.INPUT)
  * @returns {Cypress.Chainable}
  */
-export function verifyFieldTooltip(fieldTestId, expectedTooltipText, opts = {}) {
-  const { hoverWait = 500, isSelect = false } = opts;
+export function verifyFieldTooltip(fieldSelector, expectedTooltipText, opts = {}) {
+  const { hoverWait = 500, fieldType = FieldType.INPUT } = opts;
   
   // Move mouse away first to hide any previous tooltips
   cy.get('body').realHover({ position: 'topLeft' });
   
-  if (isSelect) {
-    // For select elements: find the select container and look for label with icon
-    return cy.get(`[data-testid="${fieldTestId}"]`)
-      .parents('.k-select')
-      .first()
-      .scrollIntoView()
-      .then($selectContainer => {
-        // Find the info icon in the label (sibling or within parent)
-        cy.wrap($selectContainer)
-          .find('label .kui-icon.info-icon[data-testid="kui-icon-wrapper-info-icon"]')
-          .first()
-          .scrollIntoView()
-          .should('be.visible')
-          .invoke('attr', 'aria-controls')
-          .then((tooltipId) => {
-            // Verify the tooltip is initially hidden
-            cy.get(`#${tooltipId}`)
-              .should('have.css', 'display', 'none');
-
-            // Hover over the icon
-            cy.wrap($selectContainer)
-              .find('label .kui-icon.info-icon[data-testid="kui-icon-wrapper-info-icon"]')
-              .first()
-              .realHover()
-              .wait(hoverWait);
-
-            // Verify the tooltip appears with the expected text
-            cy.get(`#${tooltipId}`)
-              .should('not.have.css', 'display', 'none')
-              .should('be.visible')
-              .should('contain.text', expectedTooltipText);
-            
-            // Move mouse away to hide the tooltip for next verification
-            cy.get('body').realHover({ position: 'topLeft' });
-            cy.get(`#${tooltipId}`)
-              .should('have.css', 'display', 'none');
-          });
-      });
-  } else {
-    // For input elements: use same pattern as verifyInputTooltip
-    return cy.get(`[data-testid="${fieldTestId}"]`)
-      .parent()
-      .parent()
-      .scrollIntoView()
-      .then($container => {
-        // Find the info icon and get its associated tooltip ID
-        cy.wrap($container)
-          .find('label .kui-icon.info-icon[data-testid="kui-icon-wrapper-info-icon"]')
-          .scrollIntoView()
-          .should('be.visible')
-          .invoke('attr', 'aria-controls')
-          .then((tooltipId) => {
-            // Verify the tooltip is initially hidden
-            cy.get(`#${tooltipId}`)
-              .should('have.css', 'display', 'none');
-
-            // Hover over the icon
-            cy.wrap($container)
-              .find('label .kui-icon.info-icon[data-testid="kui-icon-wrapper-info-icon"]')
-              .realHover()
-              .wait(hoverWait);
-
-            // Verify the tooltip appears with the expected text
-            cy.get(`#${tooltipId}`)
-              .should('not.have.css', 'display', 'none')
-              .should('be.visible')
-              .should('contain.text', expectedTooltipText);
-            
-            // Move mouse away to hide the tooltip for next verification
-            cy.get('body').realHover({ position: 'topLeft' });
-            cy.get(`#${tooltipId}`)
-              .should('have.css', 'display', 'none');
-          });
-      });
+  let containerChain = cy.get(`[data-testid="${fieldSelector}"]`);
+  let iconSelector = 'label .kui-icon.info-icon[data-testid="kui-icon-wrapper-info-icon"]';
+  let useFirst = false;
+  
+  // Configure based on field type
+  switch (fieldType) {
+    case FieldType.SELECT:
+      containerChain = containerChain.parents('.k-select').first();
+      useFirst = true; // Select elements may have multiple icons
+      break;
+      
+    case FieldType.CHECKBOX:
+      containerChain = containerChain.parents('.k-checkbox').first();
+      iconSelector = '.checkbox-label .kui-icon.info-icon[data-testid="kui-icon-wrapper-info-icon"]';
+      break;
+      
+    case FieldType.INPUT:
+    default:
+      containerChain = containerChain.parent().parent();
+      break;
   }
+  
+  return containerChain
+    .scrollIntoView()
+    .then($container => {
+      verifyTooltipBehavior(
+        $container,
+        iconSelector,
+        expectedTooltipText,
+        hoverWait,
+        useFirst
+      );
+    });
 }
 
