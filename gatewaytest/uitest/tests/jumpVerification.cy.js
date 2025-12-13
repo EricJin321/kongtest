@@ -47,7 +47,10 @@ describe('Sidebar Navigation Verification', () => {
   it('should navigate to Create Route page from Routes list', () => {
     cy.visit('http://localhost:8002/default/routes');
 
-    cy.get('a[data-testid="empty-state-action"], a[href="/default/routes/create"]').first().click({ force: true });
+    cy.get('a[data-testid="empty-state-action"], a[href="/default/routes/create"]')
+      .first()
+      .should('be.visible')
+      .click();
 
     cy.url().should('include', '/default/routes/create');
   });

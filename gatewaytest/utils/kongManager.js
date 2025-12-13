@@ -3,6 +3,7 @@ import {
   fillInput,
   clickWhenEnabled,
   selectMultiselectItems,
+  selectDropdownItem,
   ensureCheckbox,
   findAndDeleteRow
 } from './uiHelpers.js';
@@ -55,7 +56,7 @@ class KongManager {
       })
       .filter(':visible')
       .first()
-      .click({ force: true });
+      .click();
 
     // Verify navigation to the Create Service page occurred
     cy.url({ timeout: 10000 }).should('include', '/default/services/create');
@@ -119,7 +120,7 @@ class KongManager {
 
     // Visit the service page and click Add a Route
     cy.visit(visitUrl);
-    cy.get('button.add-route-btn', { timeout: 10000 }).should('be.visible').click({ force: true });
+    cy.get('button.add-route-btn', { timeout: 10000 }).should('be.visible').click();
 
     // Verify navigation to create-route page
     cy.url({ timeout: 15000 }).should('include', '/default/routes/create');
@@ -145,42 +146,19 @@ class KongManager {
         .should('exist')
         .then(() => {
           cy.get('label[data-testid="route-form-config-type-advanced-label"]', { timeout: 10000 })
-            .click({ force: true });
+            .should('be.visible')
+            .click();
         });
     }
 
     // If a protocol is requested, open protocols dropdown and select it
     if (protocolToSelect) {
-      cy.get('input[data-testid="route-form-protocols"]', { timeout: 10000 })
-        .scrollIntoView()
-        .should('be.visible')
-        .click({ force: true });
-
-      cy.contains('span.select-item-label', protocolToSelect, { timeout: 10000 })
-        .should('exist')
-        .then(($span) => {
-          if ($span.length === 0) {
-            throw new Error(`Protocol ${protocolToSelect} not found in dropdown`);
-          }
-          cy.wrap($span).click({ force: true });
-        });
+      selectDropdownItem('input[data-testid="route-form-protocols"]', protocolToSelect);
     }
 
     // If httpRedirectCode is specified, open the redirect status dropdown and select the matching code
     if (httpRedirectCode) {
-      // Click the status code input to open the dropdown
-      cy.get('input[data-testid="route-form-http-redirect-status-code"]', { timeout: 10000 })
-        .scrollIntoView()
-        .should('exist')
-        .click({ force: true });
-
-      // Select the status code label from the dropdown
-      cy.contains('span.select-item-label', String(httpRedirectCode), { timeout: 10000 })
-        .should('exist')
-        .then(($el) => {
-          if ($el.length === 0) throw new Error(`HTTP redirect code ${httpRedirectCode} not found`);
-          cy.wrap($el).click({ force: true });
-        });
+      selectDropdownItem('input[data-testid="route-form-http-redirect-status-code"]', httpRedirectCode);
     }
 
     // Submit route form

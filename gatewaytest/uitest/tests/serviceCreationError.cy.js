@@ -29,7 +29,10 @@ describe('Service Creation Error Handling', () => {
   it('should show error for invalid Connection Timeout (0)', () => {
     fillInput('[data-testid="gateway-service-url-input"]', 'http://localhost:1080/', { scroll: false });
     // Click "View advanced fields"
-    cy.get('[data-testid="collapse-trigger-label"]').contains('View advanced fields').click();
+    cy.get('[data-testid="collapse-trigger-label"]')
+      .contains('View advanced fields')
+      .should('be.visible')
+      .click();
     
     // Fill Connection Timeout with 0
     fillInput('[data-testid="gateway-service-connTimeout-input"]', '0', { scroll: true });

@@ -17,7 +17,9 @@ describe('Route Creation Error Handling', () => {
   beforeEach(() => {
     // Navigate to service detail page and click Add Route
     cy.visit(`http://localhost:8002/default/services/${serviceId}`);
-    cy.get('button.add-route-btn').click();
+    cy.get('button.add-route-btn')
+      .should('be.visible')
+      .click();
   });
 
   after(() => {

@@ -47,7 +47,7 @@ export function fillInput(selector, value, opts = {}) {
  * @returns {Cypress.Chainable}
  */
 export function clickWhenEnabled(selector, opts = {}) {
-  const { timeout = 10000, scroll = true, checkEnabled = true, force = true } = opts;
+  const { timeout = 10000, scroll = true, checkEnabled = true, force = false } = opts;
   
   return cy.get(selector, { timeout }).then(($el) => {
     let chain = cy.wrap($el);
@@ -67,6 +67,32 @@ export function clickWhenEnabled(selector, opts = {}) {
 }
 
 /**
+ * Select a single item from a dropdown.
+ * Opens the dropdown input, then clicks the matching item label.
+ * 
+ * @param {string} inputSelector - Selector for the dropdown input element (e.g., 'input[data-testid="route-form-protocols"]')
+ * @param {string} itemValue - The value/text to select (e.g., 'HTTPS', '301')
+ * @param {object} opts - Options
+ * @param {number} opts.timeout - Timeout in ms (default: 10000)
+ * @param {string} opts.itemLabelSelector - Selector pattern for item labels (default: 'span.select-item-label')
+ * @returns {Cypress.Chainable}
+ */
+export function selectDropdownItem(inputSelector, itemValue, opts = {}) {
+  const { timeout = 10000, itemLabelSelector = 'span.select-item-label' } = opts;
+  
+  // Open the dropdown
+  cy.get(inputSelector, { timeout })
+    .scrollIntoView()
+    .should('be.visible')
+    .click();
+  
+  // Select the item
+  return cy.contains(itemLabelSelector, String(itemValue), { timeout })
+    .should('be.visible')
+    .click();
+}
+
+/**
  * Select multiple items from a multiselect dropdown.
  * Opens the multiselect, then clicks each item's button.
  * 
@@ -80,17 +106,24 @@ export function clickWhenEnabled(selector, opts = {}) {
 export function selectMultiselectItems(opener, items = [], opts = {}) {
   const { timeout = 10000, itemTestidPrefix = 'multiselect-item-' } = opts;
   
-  // Open the multiselect
-  opener().click({ force: true });
+  // Open the multiselect - ensure visible first for retry mechanism
+  opener()
+    .should('be.visible')
+    .click();
   
-  // Select each item
-  items.forEach((item) => {
-    const itemSelector = `[data-testid="${itemTestidPrefix}${item}"]`;
+  // Select each item using cy.wrap().each() to maintain proper async chaining
+  cy.wrap(items).each((item) => {
+    // Type item name in the search input to filter and ensure item is visible
+    cy.get('input[data-testid="multiselect-dropdown-input"]', { timeout })
+      .should('be.visible')
+      .clear()
+      .type(item);
+    
+    // Click the filtered item button
+    const itemSelector = `[data-testid="${itemTestidPrefix}${item}"] button`;
     cy.get(itemSelector, { timeout })
-      .should('exist')
-      .within(() => {
-        cy.get('button').click({ force: true });
-      });
+      .should('be.visible')
+      .click();
   });
   
   // Close the dropdown by pressing Escape key
@@ -118,9 +151,9 @@ export function ensureCheckbox(selector, checked = true, opts = {}) {
     
     // Only click if state needs to change
     if (checked && !isChecked) {
-      cy.wrap($inp).click({ force: true });
+      cy.wrap($inp).click();
     } else if (!checked && isChecked) {
-      cy.wrap($inp).click({ force: true });
+      cy.wrap($inp).click();
     }
   });
 }
@@ -147,7 +180,9 @@ export function findRowByName(tableSelector, name, opts = {}) {
       return nameCell && nameCell.textContent && nameCell.textContent.trim() === name;
     });
     
-    return cy.wrap(matched);
+    // Wrap native DOM element as jQuery object using Cypress.$()
+    const $matched = matched ? Cypress.$(matched) : null;
+    return cy.wrap($matched);
   });
 }
 
@@ -185,13 +220,13 @@ export function findAndDeleteRow(tableSelector, name, opts = {}) {
     cy.wrap($matchedRow)
       .find(rowActionTriggerSelector)
       .first()
-      .click({ force: true });
+      .click();
     
     // Click delete action
     cy.get(deleteActionSelector, { timeout: 10000 })
       .filter(':visible')
       .first()
-      .click({ force: true });
+      .click();
     
     // Type confirmation name
     cy.get(confirmationInputSelector, { timeout: 10000 })
@@ -202,7 +237,7 @@ export function findAndDeleteRow(tableSelector, name, opts = {}) {
     // Confirm deletion
     cy.get(modalActionButtonSelector, { timeout: 10000 })
       .should('not.be.disabled')
-      .click({ force: true });
+      .click();
     
     // Wait for row to disappear
     return cy.contains(nameCellSelector, name, { timeout }).should('not.exist').then(() => true); // Indicate deleted
@@ -216,12 +251,13 @@ export function findAndDeleteRow(tableSelector, name, opts = {}) {
  */
 export function clickSidebarItem(itemName) {
   // Wait for DOM to stabilize after navigation
+  // TODO: Need a signal that toggle button is clickable. 
   cy.wait(1000);
   cy.get('body').then(($body) => {
     const toggle = $body.find('.sidebar-menu-toggle');
     if (toggle.length > 0 && toggle.is(':visible')) {
       cy.wrap(toggle).click();
-      // Wait for sidebar animation to complete
+      // TODO: need a signal waiting for sidebar animation to complete
       cy.wait(500);
     }
   });
