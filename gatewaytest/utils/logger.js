@@ -1,4 +1,9 @@
 /**
+ * @fileoverview Test logging utility
+ * @description Provides centralized logging for Cypress tests with configurable log levels
+ * and file output via Cypress tasks.
+ *
+ * @module logger
  * Write log message via Cypress task
  * @param {string} message - Message to log
  * @param {string} level - Log level ('DEBUG', 'INFO', 'WARN', 'ERROR'). Default 'INFO'.

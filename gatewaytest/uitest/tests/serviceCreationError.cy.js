@@ -1,33 +1,40 @@
+/**
+ * @fileoverview Service creation error handling tests
+ * @description Tests validation and error messages for invalid service configurations
+ * in Kong Manager UI, including URL format, naming constraints, and timeout values.
+ */
+
 import { fillInput, clickWhenEnabled } from '../../utils/uiHelpers.js';
 import { SERVICE_CREATION_ERRORS } from '../utils/errorCode.js';
+import { SERVICE_SELECTORS, URL_PATHS } from '../../utils/constants.js';
 import KongManager from '../../utils/kongManager.js';
 
 describe('Service Creation Error Handling', () => {
   beforeEach(() => {
-    cy.visit('http://localhost:8002/default/services/create');
+    cy.visit(`${Cypress.env('kongManagerUrl')}${URL_PATHS.SERVICES_CREATE}`);
   });
 
   it('should show error for invalid Full URL (file://)', () => {
-    fillInput('[data-testid="gateway-service-url-input"]', 'file://abc', { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, 'file://abc', { scroll: false });
     // Verify the error message text ignoring dynamic data-v attributes
     cy.contains('.help-text', SERVICE_CREATION_ERRORS.INVALID_URL)
       .should('be.visible');
     
     // Clear input as requested
-    cy.get('[data-testid="gateway-service-url-input"]').clear();
+    cy.get(SERVICE_SELECTORS.URL_INPUT).clear();
   });
 
   it('should show error for invalid Name (MyService$$)', () => {
-    fillInput('[data-testid="gateway-service-name-input"]', 'MyService$$', { scroll: true });
+    fillInput(SERVICE_SELECTORS.NAME_INPUT, 'MyService$$', { scroll: true });
     cy.contains('.help-text', SERVICE_CREATION_ERRORS.INVALID_NAME)
       .should('be.visible');
 
     // Clear input as requested
-    cy.get('[data-testid="gateway-service-name-input"]').clear();
+    cy.get(SERVICE_SELECTORS.NAME_INPUT).clear();
   });
 
   it('should show error for invalid Connection Timeout (0)', () => {
-    fillInput('[data-testid="gateway-service-url-input"]', 'http://localhost:1080/', { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://localhost:1080/', { scroll: false });
     // Click "View advanced fields"
     cy.get('[data-testid="collapse-trigger-label"]')
       .contains('View advanced fields')
@@ -38,7 +45,7 @@ describe('Service Creation Error Handling', () => {
     fillInput('[data-testid="gateway-service-connTimeout-input"]', '0', { scroll: true });
     
     // Click Save
-    clickWhenEnabled('[data-testid="service-create-form-submit"]', { force: false });
+    clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
     
     // Verify error message (it appears in a toast/alert list, not help-text)
     cy.contains(SERVICE_CREATION_ERRORS.INVALID_CONN_TIMEOUT).should('be.visible');
@@ -47,7 +54,7 @@ describe('Service Creation Error Handling', () => {
 
 describe('Duplicate Service Name Test', () => {
   const serviceName = 'repeatTest';
-  const serviceUrl = 'http://mockserver:1080';
+  const serviceUrl = Cypress.env('mockServerHttp');
 
   before(() => {
     // Create the initial service that we will try to duplicate
@@ -60,14 +67,14 @@ describe('Duplicate Service Name Test', () => {
   });
 
   beforeEach(() => {
-    cy.visit('http://localhost:8002/default/services/create');
+    cy.visit(`${Cypress.env('kongManagerUrl')}${URL_PATHS.SERVICES_CREATE}`);
   });
 
   it('should fail when creating a service with an existing name', () => {
-    fillInput('[data-testid="gateway-service-url-input"]', serviceUrl, { scroll: false });
-    fillInput('[data-testid="gateway-service-name-input"]', serviceName, { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, Cypress.env('mockServerHttp'), { scroll: false });
+    fillInput(SERVICE_SELECTORS.NAME_INPUT, serviceName, { scroll: false });
     
-    clickWhenEnabled('[data-testid="service-create-form-submit"]', { force: false });
+    clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
     
     // Verify unique constraint error
     cy.contains(SERVICE_CREATION_ERRORS.UNIQUE_CONSTRAINT(serviceName)).should('be.visible');

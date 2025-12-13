@@ -1,5 +1,11 @@
-import ServiceWebApi from '../utils/servicewebapi';
-import KongManager from '../../utils/kongManager';
+/**
+ * @fileoverview Regex path matching tests for Kong Gateway
+ * @description Tests Kong's regex path matching capabilities with case-insensitive patterns.
+ * Verifies that routes with regex paths correctly match or reject incoming requests.
+ */
+
+import ServiceWebApi from '../utils/servicewebapi.js';
+import KongManager from '../../utils/kongManager.js';
 
 describe('Regex Match Test API Tests', () => {
   // Top-level known service name constant (module-scoped)
@@ -11,12 +17,9 @@ describe('Regex Match Test API Tests', () => {
 
   before(() => {
     // Create a service in Kong Manager via UI
-    return KongManager.createService('http://mockserver:1080', { name: testService }).then((id) => {
-      // Create a Route with regex pattern - case insensitive match for paths starting with /regex
-      return KongManager.createRoute(id, { name: testRouteName, path: '~/(?i)regex.*ch/', methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS','HEAD'] });
-    })
-    // Wait according to configured propagation time (in endpoints.json)
-    .then(() => cy.fixture('config/endpoints.json').then(cfg => cy.wait(cfg.servicePropagationWaitMs || 8000)));
+    return KongManager.createService(Cypress.env('mockServerHttp'), { name: testService })
+      .then((id) => KongManager.createRoute(id, { name: testRouteName, path: '~/(?i)regex.*ch/', methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS','HEAD'] }))
+      .then(() => cy.wait(Cypress.env('servicePropagationWaitMs')));
   });
 
   beforeEach(() => {

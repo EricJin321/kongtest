@@ -1,4 +1,9 @@
 {
+  "kongManagerUrl": "http://localhost:8002",
+  "mockServer": {
+    "http": "http://mockserver:1080",
+    "https": "https://mockserver:1080"
+  },
   "environments": {
     "local": "localhost",
     "staging": "staging.example.com",
@@ -8,6 +13,11 @@
     "http": 8000,
     "https": 8443
   },
+  "timeouts": {
+    "pageLoadTimeout": 10000,
+    "pageNavigationTimeout": 15000,
+    "saveOperationTimeout": 30000
+  },
   "logLevel": "INFO",
-  "servicePropagationWaitMs": 5000
+  "servicePropagationWaitMs": 8000
 }

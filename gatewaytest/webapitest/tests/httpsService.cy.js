@@ -1,5 +1,11 @@
-import ServiceWebApi from '../utils/servicewebapi';
-import KongManager from '../../utils/kongManager';
+/**
+ * @fileoverview HTTPS service API tests for Kong Gateway
+ * @description Tests API operations through a Kong service configured with HTTPS upstream.
+ * Verifies that Kong correctly proxies HTTPS requests to the backend service.
+ */
+
+import ServiceWebApi from '../utils/servicewebapi.js';
+import KongManager from '../../utils/kongManager.js';
 
 describe('HTTPS TestService API Tests', () => {
   // Module-scoped constants for this HTTPS variant
@@ -9,12 +15,9 @@ describe('HTTPS TestService API Tests', () => {
 
   before(() => {
     // Create a service in Kong Manager via UI
-    return KongManager.createService('https://mockserver:1080', { name: httpsTestService }).then((id) => {
-      // Create a Route for the newly created service using KongManager helper
-      return KongManager.createRoute(id, { name: httpsRouteName, path: httpsRoutePath, methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS','HEAD'] });
-    })
-    // Wait according to configured propagation time (in endpoints.json)
-    .then(() => cy.fixture('config/endpoints.json').then(cfg => cy.wait(cfg.servicePropagationWaitMs || 8000)));
+    return KongManager.createService(Cypress.env('mockServerHttps'), { name: httpsTestService })
+      .then((id) => KongManager.createRoute(id, { name: httpsRouteName, path: httpsRoutePath, methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS','HEAD'] }))
+      .then(() => cy.wait(Cypress.env('servicePropagationWaitMs')));
   });
 
   beforeEach(() => {

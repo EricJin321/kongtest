@@ -1,5 +1,11 @@
-import { apiRequest } from './apiHelper';
-import { getBaseUrl, buildUrl } from './configLoader';
+/**
+ * @fileoverview Service API testing utilities
+ * @description Wrapper functions for testing Kong Gateway API endpoints through Cypress.
+ * Provides methods for common HTTP operations with configurable protocols and assertions.
+ */
+
+import { apiRequest } from './apiHelper.js';
+import { getBaseUrl, buildUrl } from './configLoader.js';
 
 /**
  * Service layer for WebAPI endpoints

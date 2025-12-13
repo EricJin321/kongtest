@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Kong Manager UI automation helper
+ * @description Provides high-level methods for interacting with Kong Manager UI,
+ * including service creation, route creation, and resource deletion via UI automation.
+ */
+
 import { writeLog } from './logger.js';
 import {
   fillInput,
@@ -5,8 +11,10 @@ import {
   selectMultiselectItems,
   selectDropdownItem,
   ensureCheckbox,
-  findAndDeleteRow
+  findAndDeleteRow,
+  Config
 } from './uiHelpers.js';
+import { SERVICE_SELECTORS, ROUTE_SELECTORS, TABLE_SELECTORS, URL_PATHS, URL_PATTERNS } from './constants.js';
 
 /**
  * Create a scoped fail handler that logs errors and rethrows.
@@ -37,7 +45,7 @@ class KongManager {
    * @returns {Cypress.Chainable<string>} resolves to created service id
    */
   static createService(fullUrl, options = {}) {
-    const visitUrl = options.visitUrl || 'http://localhost:8002/default/services';
+    const visitUrl = options.visitUrl || `${Config.kongManagerUrl}${URL_PATHS.SERVICES}`;
     const requestedName = options.name || null;
     writeLog('OpenUrl: ' + visitUrl, 'DEBUG');
     
@@ -49,8 +57,7 @@ class KongManager {
 
     // Click the Add toolbar anchor — prefer the toolbar button, fallback to empty-state anchor.
     // Use a combined selector and wait for at least one to be visible to handle async rendering.
-    const createServiceSelector = 'a[data-testid="toolbar-add-gateway-service"], a[data-testid="empty-state-action"], a.k-button.medium.primary[href="/default/services/create"]';
-    cy.get(createServiceSelector, { timeout: 10000 })
+    cy.get(SERVICE_SELECTORS.CREATE_SERVICE_BUTTON, { timeout: Config.pageLoadTimeout })
       .should(($els) => {
         expect($els.filter(':visible').length).to.be.gt(0, 'Expected create service button to be visible');
       })
@@ -59,29 +66,28 @@ class KongManager {
       .click();
 
     // Verify navigation to the Create Service page occurred
-    cy.url({ timeout: 10000 }).should('include', '/default/services/create');
+    cy.url({ timeout: Config.pageLoadTimeout }).should('include', '/default/services/create');
     writeLog('Navigated to /default/services/create', 'DEBUG');
 
     // Fill Full Url
     cy.log(`Filling Full Url: ${fullUrl}`);
     writeLog(`Filling Full Url: ${fullUrl}`, 'DEBUG');
-    fillInput('[data-testid="gateway-service-url-input"]', fullUrl, { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, fullUrl, { scroll: false });
 
     // Optionally fill Name
     if (requestedName) {
       cy.log(`Filling Name: ${requestedName}`);
       writeLog(`Filling Name: ${requestedName}`, 'DEBUG');
-      fillInput('[data-testid="gateway-service-name-input"]', requestedName, { scroll: false });
+      fillInput(SERVICE_SELECTORS.NAME_INPUT, requestedName, { scroll: false });
     }
 
     // Submit form
-    clickWhenEnabled('[data-testid="service-create-form-submit"]', { force: false });
+    clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
     cy.log('Save clicked - waiting for redirect to service detail');
 
     // Wait specifically for a UUID-like GUID in the URL path to avoid matching '/create'
-    const guidPathRegex = /\/default\/services\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-    return cy.url({ timeout: 30000 })
-      .should('match', guidPathRegex)
+    return cy.url({ timeout: Config.saveOperationTimeout })
+      .should('match', URL_PATTERNS.SERVICE_DETAIL_GUID)
       .then((u) => {
         cy.log('Redirect detected to service detail, extracting id');
         writeLog(`current url after creation: ${u}`, 'DEBUG');
@@ -90,7 +96,7 @@ class KongManager {
         writeLog(`Created Kong service ${id}`);
         // Unregister the fail handler now that flow succeeded
         Cypress.off('fail', failHandler);
-        // Return the created id; caller (spec) should alias id/name if desired
+        // Return the created id wrapped in cy.wrap() to maintain Cypress chain
         return cy.wrap(id);
       });
   }
@@ -107,7 +113,7 @@ class KongManager {
    * @returns {Cypress.Chainable<string>} resolves to current URL after route creation steps
    */
   static createRoute(serviceId, options = {}, stripPath = true) {
-    const visitUrl = options.visitUrl || `http://localhost:8002/default/services/${serviceId}`;
+    const visitUrl = options.visitUrl || `${Config.kongManagerUrl}/default/services/${serviceId}`;
     const routeName = options.name || 'BasicRoute';
     const routePath = options.path || 'testbasic';
     const methodsToSelect = options.methods || [];
@@ -120,32 +126,32 @@ class KongManager {
 
     // Visit the service page and click Add a Route
     cy.visit(visitUrl);
-    cy.get('button.add-route-btn', { timeout: 10000 }).should('be.visible').click();
+    cy.get(SERVICE_SELECTORS.ADD_ROUTE_BUTTON, { timeout: Config.pageLoadTimeout }).should('be.visible').click();
 
     // Verify navigation to create-route page
-    cy.url({ timeout: 15000 }).should('include', '/default/routes/create');
+    cy.url({ timeout: Config.pageNavigationTimeout }).should('include', URL_PATHS.ROUTES_CREATE);
     cy.url().should('include', `serviceId=${serviceId}`);
 
     // Fill route name and path (scroll into view)
-    fillInput('[data-testid="route-form-name"]', routeName);
-    fillInput('[data-testid="route-form-paths-input-1"]', routePath);
+    fillInput(ROUTE_SELECTORS.NAME_INPUT, routeName);
+    fillInput(ROUTE_SELECTORS.PATH_INPUT, routePath);
 
     // Open Methods multiselect and select requested methods
     if (methodsToSelect.length > 0) {
-      selectMultiselectItems(() => cy.contains('div', 'Select methods', { timeout: 10000 }), methodsToSelect);
+      selectMultiselectItems(() => cy.contains('div', 'Select methods', { timeout: Config.pageLoadTimeout }), methodsToSelect);
     }
 
     // Ensure the "Strip Path" checkbox matches the requested value.
-    ensureCheckbox('input[data-testid="route-form-strip-path"]', stripPath);
+    ensureCheckbox(ROUTE_SELECTORS.STRIP_PATH_CHECKBOX, stripPath);
 
     // If protocols option or http redirect code is specified, switch to Advanced mode
     if (protocolToSelect || httpRedirectCode) {
       // Click on the Advanced radio button (click label for compatibility)
-      cy.get('input[data-testid="route-form-config-type-advanced"]', { timeout: 10000 })
+      cy.get(ROUTE_SELECTORS.CONFIG_TYPE_ADVANCED_RADIO, { timeout: Config.pageLoadTimeout })
         .scrollIntoView()
         .should('exist')
         .then(() => {
-          cy.get('label[data-testid="route-form-config-type-advanced-label"]', { timeout: 10000 })
+          cy.get(ROUTE_SELECTORS.CONFIG_TYPE_ADVANCED_LABEL, { timeout: Config.pageLoadTimeout })
             .should('be.visible')
             .click();
         });
@@ -153,20 +159,20 @@ class KongManager {
 
     // If a protocol is requested, open protocols dropdown and select it
     if (protocolToSelect) {
-      selectDropdownItem('input[data-testid="route-form-protocols"]', protocolToSelect);
+      selectDropdownItem(ROUTE_SELECTORS.PROTOCOLS_DROPDOWN, protocolToSelect);
     }
 
     // If httpRedirectCode is specified, open the redirect status dropdown and select the matching code
     if (httpRedirectCode) {
-      selectDropdownItem('input[data-testid="route-form-http-redirect-status-code"]', httpRedirectCode);
+      selectDropdownItem(ROUTE_SELECTORS.HTTP_REDIRECT_STATUS_DROPDOWN, httpRedirectCode);
     }
 
     // Submit route form
-    clickWhenEnabled('[data-testid="route-create-form-submit"]');
+    clickWhenEnabled(ROUTE_SELECTORS.SUBMIT_BUTTON);
 
     // After save, return current URL
     cy.log('Save clicked - waiting for redirect after route creation');
-    return cy.url({ timeout: 30000 }).then((u) => {
+    return cy.url({ timeout: Config.saveOperationTimeout }).then((u) => {
       writeLog(`current url after route creation: ${u}`, 'DEBUG');
       writeLog(`Created Kong route ${routeName}`);
       Cypress.off('fail', failHandler);
@@ -182,7 +188,7 @@ class KongManager {
    * @returns {Cypress.Chainable} resolves when deletion is complete
    */
   static deleteService(serviceName, options = {}) {
-    const visitUrl = options.visitUrl || 'http://localhost:8002/default/services';
+    const visitUrl = options.visitUrl || `${Config.kongManagerUrl}${URL_PATHS.SERVICES}`;
     writeLog(`Deleting service ${serviceName}`);
 
     const failHandler = createFailHandler('KongManager.deleteService', serviceName);
@@ -191,13 +197,14 @@ class KongManager {
     cy.visit(visitUrl);
 
     // Use helper to find row by name and delete it
-    return findAndDeleteRow('table[data-tableid], table', serviceName).then((deleted) => {
+    return findAndDeleteRow(TABLE_SELECTORS.TABLE, serviceName).then((deleted) => {
       if (deleted) {
         writeLog(`Deleted service ${serviceName}`);
       } else {
         writeLog(`Service ${serviceName} not found for deletion`, 'WARN');
       }
       Cypress.off('fail', failHandler);
+      return cy.wrap(null);
     });
   }
 
@@ -209,7 +216,7 @@ class KongManager {
    * @returns {Cypress.Chainable} resolves when deletion is complete
    */
   static deleteRoute(routeName, options = {}) {
-    const visitUrl = options.visitUrl || 'http://localhost:8002/default/routes';
+    const visitUrl = options.visitUrl || `${Config.kongManagerUrl}${URL_PATHS.ROUTES}`;
     writeLog(`Deleting route ${routeName}`);
 
     const failHandler = createFailHandler('KongManager.deleteRoute', routeName);
@@ -218,7 +225,7 @@ class KongManager {
     cy.visit(visitUrl);
 
     // Use helper to find row by name and delete it
-    return findAndDeleteRow('table[data-tableid], table', routeName)
+    return findAndDeleteRow(TABLE_SELECTORS.TABLE, routeName)
       .then((deleted) => {
         if (deleted) {
           writeLog(`Deleted route ${routeName}`);
@@ -226,6 +233,7 @@ class KongManager {
           writeLog(`Route ${routeName} not found for deletion`, 'WARN');
         }
         Cypress.off('fail', failHandler);
+        return cy.wrap(null);
       });
   }
 }

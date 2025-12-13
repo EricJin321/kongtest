@@ -1,3 +1,9 @@
+/**
+ * @fileoverview API request helper for Cypress tests
+ * @description Wrapper for cy.request() with enhanced logging and error handling.
+ * Provides standardized API request execution with configurable timeouts and SSL verification.
+ */
+
 import { writeLog } from '../../utils/logger.js';
 
 /**

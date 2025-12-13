@@ -1,7 +1,25 @@
 /**
- * Shared UI helper utilities for Cypress tests.
- * These helpers encapsulate common UI interaction patterns to reduce code duplication.
+ * @fileoverview UI interaction utilities for Cypress tests
+ * @description Common helper functions for UI interactions including form filling,
+ * button clicks, dropdown/multiselect operations, and configuration access.
  */
+
+import { writeLog } from './logger.js';
+
+/**
+ * Get configuration value from Cypress environment
+ * All config values are loaded at startup from endpoints.json
+ */
+export const Config = {
+  get kongManagerUrl() { return Cypress.env('kongManagerUrl'); },
+  get mockServerHttp() { return Cypress.env('mockServerHttp'); },
+  get mockServerHttps() { return Cypress.env('mockServerHttps'); },
+  get pageLoadTimeout() { return Cypress.env('pageLoadTimeout'); },
+  get pageNavigationTimeout() { return Cypress.env('pageNavigationTimeout'); },
+  get saveOperationTimeout() { return Cypress.env('saveOperationTimeout'); },
+  get servicePropagationWaitMs() { return Cypress.env('servicePropagationWaitMs'); },
+  get logLevel() { return Cypress.env('logLevel'); }
+};
 
 /**
  * Fill an input field with a value.

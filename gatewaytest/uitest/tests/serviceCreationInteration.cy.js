@@ -1,10 +1,17 @@
+/**
+ * @fileoverview Service creation interaction and tooltip tests
+ * @description Tests user interactions during service creation, including field tooltips,
+ * section expand/collapse, and form validation behavior.
+ */
+
 import "cypress-real-events/support";
 import { verifyFieldTooltip, FieldType, expandCollapseSection } from '../../utils/uiHelpers.js';
+import { SERVICE_SELECTORS, URL_PATHS } from '../../utils/constants.js';
 
 describe('Service Creation Interaction', () => {
   beforeEach(() => {
-    cy.visit('http://localhost:8002/default/services/create');
-    cy.get('[data-testid="gateway-service-url-input"]', { timeout: 10000 })
+    cy.visit(`${Cypress.env('kongManagerUrl')}${URL_PATHS.SERVICES_CREATE}`);
+    cy.get(SERVICE_SELECTORS.URL_INPUT, { timeout: Cypress.env('pageLoadTimeout') })
       .should('be.visible');
     cy.wait(1000);
     // TODO: need get a signal that tooltip hover event binded. It happens after dom elelment shows up.
@@ -103,9 +110,9 @@ describe('Service Creation Interaction', () => {
 
 describe('Service Creation Manual Configuration', () => {
   beforeEach(() => {
-    cy.visit('http://localhost:8002/default/services/create');
+    cy.visit(`${Cypress.env('kongManagerUrl')}${URL_PATHS.SERVICES_CREATE}`);
     // Wait for page to load completely
-    cy.get('[data-testid="gateway-service-url-input"]', { timeout: 10000 })
+    cy.get(SERVICE_SELECTORS.URL_INPUT, { timeout: Cypress.env('pageLoadTimeout') })
       .should('be.visible');
   });
 

@@ -53,8 +53,26 @@ module.exports = defineConfig({
     supportFile: 'webapitest/support.js',
     
     setupNodeEvents(on, config) {
+      // Load test configuration from endpoints.json and inject into Cypress.env
+      const endpointsConfig = JSON.parse(
+        fs.readFileSync(path.join(__dirname, 'cypress/fixtures/config/endpoints.json'), 'utf8')
+      );
+      
+      // Inject configuration as environment variables
+      config.env = {
+        ...config.env,
+        kongManagerUrl: endpointsConfig.kongManagerUrl,
+        mockServerHttp: endpointsConfig.mockServer.http,
+        mockServerHttps: endpointsConfig.mockServer.https,
+        pageLoadTimeout: endpointsConfig.timeouts.pageLoadTimeout,
+        pageNavigationTimeout: endpointsConfig.timeouts.pageNavigationTimeout,
+        saveOperationTimeout: endpointsConfig.timeouts.saveOperationTimeout,
+        servicePropagationWaitMs: endpointsConfig.servicePropagationWaitMs,
+        logLevel: endpointsConfig.logLevel
+      };
+      
       // Node event handlers / tasks
-        on('task', {
+      on('task', {
         writeLog(message) {
           const logDir = path.join(__dirname, 'cypress/logs');
           const logFile = path.join(logDir, 'test.log');
@@ -73,6 +91,9 @@ module.exports = defineConfig({
           }
         }
       });
+      
+      // Return the modified config
+      return config;
     }
   },
 })
