@@ -66,6 +66,8 @@ export const ROUTE_SELECTORS = {
   // Route Creation Form
   NAME_INPUT: '[data-testid="route-form-name"]',
   PATH_INPUT: '[data-testid="route-form-paths-input-1"]',
+  PATH_INPUT_N: (n) => `[data-testid="route-form-paths-input-${n}"]`, // Dynamic path input selector
+  ADD_PATH_BUTTON: 'button[data-testid="add-paths"]',
   HOST_INPUT: '[data-testid="route-form-hosts-input-1"]',
   METHODS_MULTISELECT: 'div:contains("Select methods")',
   STRIP_PATH_CHECKBOX: 'input[data-testid="route-form-strip-path"]',

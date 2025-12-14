@@ -67,6 +67,14 @@ These tests verify the runtime behavior of the Kong Gateway by configuring Servi
 - **Redirect Test**:
   - Verifies `httpRedirectCode` configuration (302 redirect from HTTP to HTTPS).
 
+### 1.7. Route Multiple Path Test (`routeMultiplePath.cy.js`)
+**Objective**: Verify that a single route can handle multiple paths configured in Advanced mode.
+- **Setup**: Service `RouteMultiplePathService`, Route `MultiplePathRoute` with primary path `/primary` and additional path `/secondary` (configured via Advanced mode).
+- **Test Cases**:
+  - `should test getHelloApi with primary path`: Verifies requests to `/primary` are routed correctly (200 OK).
+  - `should test getHelloApi with secondary path`: Verifies requests to `/secondary` are routed correctly (200 OK).
+- **Note**: Tests the `extraPaths` parameter in `KongManager.createRoute()`, which automatically switches to Advanced mode and adds additional paths via the "Add a path" button.
+
 ---
 
 ## 2. UI Tests (`uitest/`)

@@ -108,6 +108,7 @@ class KongManager {
    * @param {string} options.visitUrl - service detail page to visit (default: constructed from serviceId)
    * @param {string} options.name - route name (default: 'BasicRoute')
    * @param {string} options.path - route path (default: 'testbasic')
+   * @param {Array<string>} options.extraPaths - additional paths to add (requires Advanced mode)
    * @param {Array<string>} options.methods - list of HTTP methods to select (e.g. ['GET','POST'])
    * @param {string} options.protocols - protocol to select (e.g. 'HTTPS', 'HTTP')
    * @returns {Cypress.Chainable<string>} resolves to current URL after route creation steps
@@ -116,6 +117,7 @@ class KongManager {
     const visitUrl = options.visitUrl || `${Config.kongManagerUrl}/default/services/${serviceId}`;
     const routeName = options.name || 'BasicRoute';
     const routePath = options.path || 'testbasic';
+    const extraPaths = options.extraPaths || [];
     const methodsToSelect = options.methods || [];
     const protocolToSelect = options.protocols || null;
     const httpRedirectCode = options.httpRedirectCode || null;
@@ -144,8 +146,8 @@ class KongManager {
     // Ensure the "Strip Path" checkbox matches the requested value.
     ensureCheckbox(ROUTE_SELECTORS.STRIP_PATH_CHECKBOX, stripPath);
 
-    // If protocols option or http redirect code is specified, switch to Advanced mode
-    if (protocolToSelect || httpRedirectCode) {
+    // If extraPaths, protocols, or http redirect code is specified, switch to Advanced mode
+    if (extraPaths.length > 0 || protocolToSelect || httpRedirectCode) {
       // Click on the Advanced radio button (click label for compatibility)
       cy.get(ROUTE_SELECTORS.CONFIG_TYPE_ADVANCED_RADIO, { timeout: Config.pageLoadTimeout })
         .scrollIntoView()
@@ -155,6 +157,19 @@ class KongManager {
             .should('be.visible')
             .click();
         });
+    }
+
+    // Add extra paths if provided (after switching to Advanced mode)
+    if (extraPaths.length > 0) {
+      cy.wrap(extraPaths).each((extraPath, index) => {
+        // Click "Add a path" button
+        cy.get(ROUTE_SELECTORS.ADD_PATH_BUTTON, { timeout: Config.pageLoadTimeout })
+          .should('be.visible')
+          .click();
+        
+        // Fill the additional path input (index + 2 because first path is input-1)
+        fillInput(ROUTE_SELECTORS.PATH_INPUT_N(index + 2), extraPath);
+      });
     }
 
     // If a protocol is requested, open protocols dropdown and select it

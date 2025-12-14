@@ -8,14 +8,14 @@ const getSpecPattern = () => {
   const testSet = process.env.TEST_SET || 'all';
   
     const patterns = {
-    all: '{webapitest/tests/{regexMatchTest.cy.js,basicService.cy.js,httpsService.cy.js,noStripPath.cy.js,methodNotSupport.cy.js,httpBlockTest.cy.js},uitest/tests/{serviceCreationError.cy.js,routeCreationError.cy.js,jumpVerification.cy.js,listVerification.cy.js,serviceCreationInteration.cy.js,serviceBoundaryValues.cy.js}}',
+    all: '{webapitest/tests/{regexMatchTest.cy.js,basicService.cy.js,httpsService.cy.js,noStripPath.cy.js,methodNotSupport.cy.js,httpBlockTest.cy.js,routeMultiplePath.cy.js},uitest/tests/{serviceCreationError.cy.js,routeCreationError.cy.js,jumpVerification.cy.js,listVerification.cy.js,serviceCreationInteration.cy.js,serviceBoundaryValues.cy.js}}',
     // all-firefox: all tests except tooltip interaction tests (Firefox doesn't support CDP for cypress-real-events)
     // TODO: Support tooltip tests on Firefox by implementing alternative hover mechanism (e.g., .trigger('mouseover'))
-    'all-firefox': '{webapitest/tests/{regexMatchTest.cy.js,basicService.cy.js,httpsService.cy.js,noStripPath.cy.js,methodNotSupport.cy.js,httpBlockTest.cy.js},uitest/tests/{serviceCreationError.cy.js,routeCreationError.cy.js,jumpVerification.cy.js,listVerification.cy.js,serviceBoundaryValues.cy.js}}',
-    // comprehensive runs basicService, httpsService and noStripPath specs
-    comprehensive: 'webapitest/tests/{regexMatchTest.cy.js,basicService.cy.js,httpsService.cy.js,noStripPath.cy.js,methodNotSupport.cy.js,httpBlockTest.cy.js}',
+    'all-firefox': '{webapitest/tests/{regexMatchTest.cy.js,basicService.cy.js,httpsService.cy.js,noStripPath.cy.js,methodNotSupport.cy.js,httpBlockTest.cy.js,routeMultiplePath.cy.js},uitest/tests/{serviceCreationError.cy.js,routeCreationError.cy.js,jumpVerification.cy.js,listVerification.cy.js,serviceBoundaryValues.cy.js}}',
+    // comprehensive runs all API tests
+    comprehensive: 'webapitest/tests/{regexMatchTest.cy.js,basicService.cy.js,httpsService.cy.js,noStripPath.cy.js,methodNotSupport.cy.js,httpBlockTest.cy.js,routeMultiplePath.cy.js}',
     // basic runs only basicService spec
-    test: 'uitest/tests/serviceCreationError.cy.js',
+    test: 'webapitest/tests/routeMultiplePath.cy.js',
     basic: 'webapitest/tests/basicService.cy.js',
     ui: 'uitest/tests/{serviceCreationError.cy.js,routeCreationError.cy.js,jumpVerification.cy.js,listVerification.cy.js,serviceCreationInteration.cy.js,serviceBoundaryValues.cy.js}',
   };

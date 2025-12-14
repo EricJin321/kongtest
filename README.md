@@ -107,6 +107,7 @@ Validates Service and Route creation and functionality by executing various HTTP
   - `strip_path` behavior (NoStripPath).
   - Regex path matching.
   - HTTPS-only routes.
+  - Multiple paths on a single route (Advanced mode configuration).
 > **Note**: Testing for Services configured with a specific `path` is currently excluded due to unclear expected behavior regarding path forwarding (see [Bug 1](Bug.md)).
 
 #### 🚧 To-Do
