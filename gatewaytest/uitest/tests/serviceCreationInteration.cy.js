@@ -38,7 +38,7 @@ describe('Service Creation Interaction', () => {
       .should('not.exist');
 
     cy.log('Step 4: Expand advanced fields section');
-    expandCollapseSection('[data-testid="collapse-trigger-content"]', 'View advanced fields');
+    expandCollapseSection(SERVICE_SELECTORS.COLLAPSE_TRIGGER_CONTENT, 'View advanced fields');
     
     cy.log('Step 5: Verify advanced fields section is visible');
     cy.get('[data-testid="collapse-hidden-content"]')
@@ -98,7 +98,7 @@ describe('Service Creation Interaction', () => {
       .should('not.be.visible');
 
     cy.log('Step 14: Expand tags section');
-    expandCollapseSection('[data-testid="tags-collapse"] [data-testid="collapse-trigger-content"]', 'Add tags');
+    expandCollapseSection(SERVICE_SELECTORS.TAGS_COLLAPSE_TRIGGER, 'Add tags');
 
     cy.log('Step 15: Verify Tags tooltip');
     verifyFieldTooltip(
@@ -126,7 +126,21 @@ describe('Service Creation Manual Configuration', () => {
 
     // Wait for the form to update after switching modes
     cy.get(SERVICE_SELECTORS.PROTOCOL_SELECT)
+      .scrollIntoView()
       .should('be.visible');
+    cy.get(SERVICE_SELECTORS.HOST_INPUT)
+      .scrollIntoView()
+      .should('be.visible');
+    cy.get(SERVICE_SELECTORS.PORT_INPUT)
+      .scrollIntoView()
+      .should('be.visible');
+    cy.get(SERVICE_SELECTORS.PATH_INPUT)
+      .scrollIntoView()
+      .should('be.visible');
+
+    // Verify URL input is no longer visible
+    cy.get(SERVICE_SELECTORS.URL_INPUT)
+      .should('not.exist');
 
     cy.log('Step 2: Verify Protocol tooltip');
     verifyFieldTooltip(
@@ -161,7 +175,7 @@ describe('Service Creation Manual Configuration', () => {
       .should('not.exist');
 
     cy.log('Step 7: Expand advanced fields section');
-    expandCollapseSection('[data-testid="advanced-fields-collapse"] [data-testid="collapse-trigger-content"]', 'View advanced fields');
+    expandCollapseSection(SERVICE_SELECTORS.ADVANCED_FIELDS_COLLAPSE_TRIGGER, 'View advanced fields');
 
     cy.log('Step 8: Verify Retries tooltip');
     verifyFieldTooltip(
@@ -196,7 +210,7 @@ describe('Service Creation Manual Configuration', () => {
       .should('not.be.visible');
 
     cy.log('Step 13: Expand tags section');
-    expandCollapseSection('[data-testid="tags-collapse"] [data-testid="collapse-trigger-content"]', 'Add tags');
+    expandCollapseSection(SERVICE_SELECTORS.TAGS_COLLAPSE_TRIGGER, 'Add tags');
 
     cy.log('Step 14: Verify Tags tooltip');
     verifyFieldTooltip(

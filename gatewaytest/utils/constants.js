@@ -17,6 +17,8 @@ export const SERVICE_SELECTORS = {
   NAME_INPUT: '[data-testid="gateway-service-name-input"]',
   SUBMIT_BUTTON: '[data-testid="service-create-form-submit"]',
   COLLAPSE_TRIGGER_CONTENT: '[data-testid="collapse-trigger-content"]',
+  ADVANCED_FIELDS_COLLAPSE_TRIGGER: '[data-testid="advanced-fields-collapse"] [data-testid="collapse-trigger-content"]',
+  TAGS_COLLAPSE_TRIGGER: '[data-testid="tags-collapse"] [data-testid="collapse-trigger-content"]',
   RETRIES_INPUT: '[data-testid="gateway-service-retries-input"]',
   CONN_TIMEOUT_INPUT: '[data-testid="gateway-service-connTimeout-input"]',
   WRITE_TIMEOUT_INPUT: '[data-testid="gateway-service-writeTimeout-input"]',
@@ -64,6 +66,7 @@ export const ROUTE_SELECTORS = {
   // Route Creation Form
   NAME_INPUT: '[data-testid="route-form-name"]',
   PATH_INPUT: '[data-testid="route-form-paths-input-1"]',
+  HOST_INPUT: '[data-testid="route-form-hosts-input-1"]',
   METHODS_MULTISELECT: 'div:contains("Select methods")',
   STRIP_PATH_CHECKBOX: 'input[data-testid="route-form-strip-path"]',
   

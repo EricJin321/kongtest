@@ -43,7 +43,8 @@ describe('Service Creation with Boundary Values', () => {
     // Expand advanced fields
     expandCollapseSection(SERVICE_SELECTORS.COLLAPSE_TRIGGER_CONTENT, 'View advanced fields');
     
-    // Set all timeout values to 1ms
+    // Set retries to minimum (0) and all timeout values to 1ms
+    fillInput(SERVICE_SELECTORS.RETRIES_INPUT, '0', { scroll: true });
     fillInput(SERVICE_SELECTORS.CONN_TIMEOUT_INPUT, '1', { scroll: true });
     fillInput(SERVICE_SELECTORS.WRITE_TIMEOUT_INPUT, '1', { scroll: true });
     fillInput(SERVICE_SELECTORS.READ_TIMEOUT_INPUT, '1', { scroll: true });
@@ -73,7 +74,8 @@ describe('Service Creation with Boundary Values', () => {
     // Expand advanced fields
     expandCollapseSection(SERVICE_SELECTORS.COLLAPSE_TRIGGER_CONTENT, 'View advanced fields');
     
-    // Set all timeout values to 2147483646ms
+    // Set retries to maximum (32767) and all timeout values to 2147483646ms
+    fillInput(SERVICE_SELECTORS.RETRIES_INPUT, '32767', { scroll: true });
     fillInput(SERVICE_SELECTORS.CONN_TIMEOUT_INPUT, maxTimeout, { scroll: true });
     fillInput(SERVICE_SELECTORS.WRITE_TIMEOUT_INPUT, maxTimeout, { scroll: true });
     fillInput(SERVICE_SELECTORS.READ_TIMEOUT_INPUT, maxTimeout, { scroll: true });

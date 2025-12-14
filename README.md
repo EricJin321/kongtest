@@ -91,9 +91,11 @@ Focuses on edge cases for UI operations and page navigation verification, as hap
 - **Service Creation Error Handling**: Validates form inputs, error messages, and constraint enforcement.
 - **Service Creation Interaction**: Validates tooltip information for all service creation form fields in both URL mode and manual configuration mode.
 - **Service Boundary Values**: Tests extreme timeout values (1ms and 2147483646ms) and special characters in service names.
-- **Route Creation Error Handling**: Validates route forms, path format, and name constraints.
+- **Route Creation Error Handling**: Validates route name/path format, Host field validation (incomplete IP, special characters, international characters), and name uniqueness constraint.
 - **Navigation**: Verifies sidebar navigation and page redirects.
 - **List Verification**: Verifies that created services and routes appear correctly in their respective lists.
+
+> **Note**: Route Boundary Value tests are not included in this suite because Route creation parameters lack client-side validation in Kong Manager UI. The form accepts invalid inputs (e.g., empty methods, no service binding, extremely large priority values) without any validation feedback. This design limitation (documented as Bugs #11, #12, #13 in [Bug.md](Bug.md)) makes comprehensive boundary value testing impractical and of limited value for UI validation.
 
 ### API Tests (`webapitest/`)
 Validates Service and Route creation and functionality by executing various HTTP/HTTPS combinations against the created endpoints.

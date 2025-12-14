@@ -10,7 +10,18 @@
 export const SERVICE_CREATION_ERRORS = {
   INVALID_URL: 'The URL must follow a valid format. Example: https://api.kong-air.com/flights',
   INVALID_NAME: 'The name can be any string containing characters, letters, numbers, or the following characters: ., -, _, or ~. Do not use spaces.',
+  INVALID_HOST_EMPTY: 'Host cannot be empty',
+  INVALID_PORT_RANGE: 'Port must be between 0 and 65535',
+  INVALID_RETRIES: 'schema violation (retries: value should be between 0 and 32767)',
   INVALID_CONN_TIMEOUT: 'schema violation (connect_timeout: value should be between 1 and 2147483646)',
+  INVALID_WRITE_TIMEOUT: 'schema violation (write_timeout: value should be between 1 and 2147483646)',
+  INVALID_READ_TIMEOUT: 'schema violation (read_timeout: value should be between 1 and 2147483646)',
+  INVALID_HOST_VALUE: (host) => `schema violation (host: invalid value: ${host})`,
+  INVALID_PATH_RFC3986: (path) => `schema violation (path: invalid path: '${path}' (characters outside of the reserved list of RFC 3986 found))`,
+  INVALID_CLIENT_CERT_HTTP: "2 schema violations (failed conditional validation given value of field 'protocol'; client_certificate: value must be null)",
+  INVALID_CA_CERTS_HTTP: "2 schema violations (failed conditional validation given value of field 'protocol'; ca_certificates: value must be null)",
+  INVALID_CLIENT_CERT_UUID: 'schema violation (client_certificate.id: expected a valid UUID)',
+  INVALID_CA_CERTS_UUID: 'schema violation (ca_certificates.1: expected a valid UUID)',
   UNIQUE_CONSTRAINT: (name) => `UNIQUE violation detected on '{name="${name}"}'`,
 };
 
@@ -21,6 +32,8 @@ export const SERVICE_CREATION_ERRORS = {
 export const ROUTE_CREATION_ERRORS = {
   INVALID_ROUTE_NAME: (name) => `schema violation (name: invalid value '${name}': the only accepted ascii characters are alphanumerics or ., -, _, and ~)`,
   INVALID_PATH_FORMAT: 'schema violation (paths.1: should start with: / (fixed path) or ~/ (regex path))',
+  INVALID_HOST_IPV4: (host) => `schema violation (hosts.1: invalid ipv4 address: ${host})`,
+  INVALID_HOST_HOSTNAME: (host) => `schema violation (hosts.1: invalid hostname: ${host})`,
   UNIQUE_CONSTRAINT: (name) => `UNIQUE violation detected on '{name="${name}"}'`,
 };
 

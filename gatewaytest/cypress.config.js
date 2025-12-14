@@ -12,7 +12,7 @@ const getSpecPattern = () => {
     // comprehensive runs basicService, httpsService and noStripPath specs
     comprehensive: 'webapitest/tests/{regexMatchTest.cy.js,basicService.cy.js,httpsService.cy.js,noStripPath.cy.js,methodNotSupport.cy.js,httpBlockTest.cy.js}',
     // basic runs only basicService spec
-    test: 'uitest/tests/serviceBoundaryValues.cy.js',
+    test: 'uitest/tests/serviceCreationError.cy.js',
     basic: 'webapitest/tests/basicService.cy.js',
     ui: 'uitest/tests/{serviceCreationError.cy.js,routeCreationError.cy.js,jumpVerification.cy.js,listVerification.cy.js,serviceCreationInteration.cy.js,serviceBoundaryValues.cy.js}',
   };

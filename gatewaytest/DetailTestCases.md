@@ -74,12 +74,29 @@ These tests verify the runtime behavior of the Kong Gateway by configuring Servi
 These tests verify the functionality and user experience of the Kong Manager interface, focusing on form validation, error handling, and navigation.
 
 ### 2.1. Service Creation Error Handling (`serviceCreationError.cy.js`)
-**Objective**: Validate form constraints when creating a Service.
-- **Test Cases**:
-  - `should show error for invalid Full URL`: Validates URL format (e.g., rejects `file://`).
-  - `should show error for invalid Name`: Validates name characters (rejects special chars like `$$`).
-  - `should show error for invalid Connection Timeout`: Validates numeric constraints.
-  - `should fail when creating a service with an existing name`: Verifies unique name constraint.
+**Objective**: Validate form constraints and error messages when creating a Service.
+- **Describe: Service Creation Error Handling**:
+  - `should validate URL format - accept valid URLs and reject invalid ones`: Tests client-side URL validation including protocol validation (accepts http/https/grpc/ws/wss, rejects file/ftp/data), port validation (rejects negative/non-numeric/out-of-range ports), and hostname validation (rejects spaces, invalid characters, malformed IPs).
+  - `should show errors for invalid Host and Port in manual configuration mode`: Validates that empty Host and out-of-range Port (65536) trigger error messages in manual mode.
+  - `should show error for invalid Name (MyService$$)`: Validates name character constraints (rejects `$$`).
+- **Describe: Service Creation with Schema Violation URLs**:
+  - `should show error for invalid Retries (32768)`: Validates Retries upper bound (max: 32767).
+  - `should show error for invalid Connection Timeout (0)`: Validates Connection Timeout lower bound (min: 1).
+  - `should show error for invalid Write Timeout (2147483647)`: Validates Write Timeout upper bound (max: 2147483646).
+  - `should show error for invalid Read Timeout (0)`: Validates Read Timeout lower bound (min: 1).
+  - `should show error for invalid Connection Timeout (2147483647)`: Validates Connection Timeout upper bound (max: 2147483646).
+  - `should show error for invalid Write Timeout (2147483647)`: Validates Write Timeout upper bound (duplicate test with different scenario).
+  - `should show error for invalid Read Timeout (2147483647)`: Validates Read Timeout upper bound (max: 2147483646).
+  - `should reject URL with incomplete IP address and show schema violation error`: Tests backend validation for incomplete IP (e.g., `http://1.1.1`).
+  - `should reject URL with unencoded spaces in path and show schema violation error`: Tests backend validation for RFC 3986 violation (e.g., `/path with spaces`).
+  - `should reject URL with invalid characters in query and show schema violation error`: Tests backend validation for invalid query characters (e.g., `?query=<script>`).
+  - `should reject URL with unencoded quote in path and show schema violation error`: Tests backend validation for unencoded quotes (e.g., `/path"quote`).
+  - `should show error for Client certificate with HTTP protocol`: Validates conditional validation - client certificate must be null for HTTP protocol.
+  - `should show error for CA certificates with HTTP protocol`: Validates conditional validation - CA certificates must be null for HTTP protocol.
+  - `should show error for invalid Client certificate UUID format`: Validates UUID format for client certificate.
+  - `should show error for invalid CA certificates UUID format`: Validates UUID format for CA certificates.
+- **Describe: Duplicate Service Name Test**:
+  - `should fail when creating a service with an existing name`: Verifies unique name constraint enforcement.
 
 ### 2.2. Service Creation Interaction (`serviceCreationInteration.cy.js`)
 **Objective**: Verify tooltip information display for all service creation form fields.
@@ -98,28 +115,32 @@ These tests verify the functionality and user experience of the Kong Manager int
   - Ensures tooltips appear on hover and display correct information text.
 
 ### 2.3. Service Boundary Values (`serviceBoundaryValues.cy.js`)
-**Objective**: Test service creation with extreme timeout values and special characters.
+**Objective**: Test service creation with extreme timeout values and special characters in service names.
 - **Test Cases**:
-  - `should create service with minimum timeout values (1ms)`: Creates service `Boundary_Service-1` with all timeout fields set to 1ms (minimum valid value).
-  - `should create service with maximum timeout values (2147483646ms)`: Creates service `Boundary_Service~1` with all timeout fields set to 2147483646ms (near INT32_MAX).
+  - `should create service with minimum timeout values (1ms)`: Creates service `Boundary_Service-1` with Retries=0 (minimum), and all timeout fields (Connection/Write/Read) set to 1ms (minimum valid value). Verifies successful creation and redirect to service detail page.
+  - `should create service with maximum timeout values (2147483646ms)`: Creates service `Boundary_Service~1` with Retries=32767 (maximum) and all timeout fields set to 2147483646ms (maximum valid value, near INT32_MAX). Verifies successful creation and redirect to service detail page.
 - **Validation**:
-  - Verifies service names can include special characters (`.`, `-`, `~`) per Kong's naming rules.
-  - Verifies that extreme timeout values are accepted and the service is successfully created.
-  - Confirms redirect to service detail page after creation.
+  - Confirms service names can include special characters (`.`, `-`, `~`) per Kong's naming rules.
+  - Verifies that extreme boundary values are accepted and services are successfully created.
+  - Ensures proper redirect to service detail page after successful creation.
 
 ### 2.4. Route Creation Error Handling (`routeCreationError.cy.js`)
 **Objective**: Validate form constraints when creating a Route.
 - **Test Cases**:
-  - `should show error for invalid Route Name`: Validates name characters.
-  - `should show error for invalid Path format`: Ensures paths start with `/`.
-  - `should fail when creating a route with an existing name`: Verifies unique name constraint.
+  - `should show error for invalid Route Name (MyRoute$$)`: Validates that route names must only contain alphanumerics or `.`, `-`, `_`, `~`.
+  - `should show error for invalid Path format (missing leading slash)`: Ensures paths start with `/` or `~/` for regex paths.
+  - `should show error for invalid Host (incomplete IP 1.1.1)`: Validates that incomplete IPv4 addresses are rejected with schema violation error.
+  - `should show error for invalid Host (# character)`: Validates that hostnames with special characters like `#` are rejected.
+  - `should show error for invalid Host (Chinese characters)`: Validates that hostnames with international characters (e.g., `主机.com`) are rejected.
+  - `should fail when creating a route with an existing name`: Verifies unique name constraint enforcement.
+- **Note**: Route Boundary Value tests (e.g., extreme priority values, maximum header counts, empty methods) are not included because Route creation parameters lack client-side validation in Kong Manager UI. The form accepts invalid inputs without any validation feedback. This design limitation (documented as Bugs #11, #12, #13 in Bug.md) makes comprehensive boundary value testing impractical and of limited value for UI validation.
 
 ### 2.5. Sidebar Navigation Verification (`jumpVerification.cy.js`)
-**Objective**: Verify navigation flows within Kong Manager.
+**Objective**: Verify navigation flows and page redirects within Kong Manager.
 - **Test Cases**:
-  - `should navigate to Gateway Services and Routes pages`: Verifies sidebar links work.
-  - `should navigate to Create Service page and verify creation redirect`: Verifies the full flow from "Create" button to "Service Detail" page.
-  - `should navigate to Create Route page from Routes list`: Verifies navigation to route creation.
+  - `should navigate to Gateway Services and Routes pages`: Clicks sidebar items "Gateway Services" and "Routes", verifies URL changes to respective pages.
+  - `should navigate to Create Service page and verify creation redirect`: Full workflow test - navigates to Services list, clicks "Create Service" button, fills form (URL and Name), saves, and verifies redirect to Service Detail page with GUID pattern URL.
+  - `should navigate to Create Route page from Routes list`: Navigates to Routes list, clicks "Create Route" action button (from empty state), verifies URL includes routes/create path.
 
 ### 2.6. List Verification (`listVerification.cy.js`)
 **Objective**: Verify that created entities correctly appear in their respective management lists.

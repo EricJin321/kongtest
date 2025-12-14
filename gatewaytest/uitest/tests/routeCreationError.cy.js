@@ -5,7 +5,7 @@
  */
 
 import KongManager from '../../utils/kongManager.js';
-import { fillInput, clickWhenEnabled } from '../../utils/uiHelpers.js';
+import { fillInput, clickWhenEnabled, selectMultiselectItems } from '../../utils/uiHelpers.js';
 import { ROUTE_CREATION_ERRORS } from '../utils/errorCode.js';
 import { SERVICE_SELECTORS, ROUTE_SELECTORS } from '../../utils/constants.js';
 
@@ -54,6 +54,66 @@ describe('Route Creation Error Handling', () => {
     clickWhenEnabled(ROUTE_SELECTORS.SUBMIT_BUTTON);
     
     cy.contains(ROUTE_CREATION_ERRORS.INVALID_PATH_FORMAT).should('be.visible');
+  });
+
+  it('should show error for invalid Host (incomplete IP 1.1.1)', () => {
+    fillInput(ROUTE_SELECTORS.NAME_INPUT, 'ValidRouteName');
+    fillInput(ROUTE_SELECTORS.PATH_INPUT, '/validpath');
+    // Select GET method
+    selectMultiselectItems(() => cy.contains('div', 'Select methods'), ['GET']);
+    
+    // Fill invalid host
+    fillInput(ROUTE_SELECTORS.HOST_INPUT, '1.1.1');
+    
+    clickWhenEnabled(ROUTE_SELECTORS.SUBMIT_BUTTON);
+    
+    // Verify URL did not navigate away
+    cy.url().should('include', '/routes/create');
+    
+    // Verify error message
+    cy.contains('p', ROUTE_CREATION_ERRORS.INVALID_HOST_IPV4('1.1.1'))
+      .scrollIntoView()
+      .should('be.visible');
+  });
+
+  it('should show error for invalid Host (# character)', () => {
+    fillInput(ROUTE_SELECTORS.NAME_INPUT, 'ValidRouteName');
+    fillInput(ROUTE_SELECTORS.PATH_INPUT, '/validpath');
+    // Select GET method
+    selectMultiselectItems(() => cy.contains('div', 'Select methods'), ['GET']);
+    
+    // Fill invalid host with # character
+    fillInput(ROUTE_SELECTORS.HOST_INPUT, '#host.com');
+    
+    clickWhenEnabled(ROUTE_SELECTORS.SUBMIT_BUTTON);
+    
+    // Verify URL did not navigate away
+    cy.url().should('include', '/routes/create');
+    
+    // Verify error message
+    cy.contains('p', ROUTE_CREATION_ERRORS.INVALID_HOST_HOSTNAME('#host.com'))
+      .scrollIntoView()
+      .should('be.visible');
+  });
+
+  it('should show error for invalid Host (Chinese characters)', () => {
+    fillInput(ROUTE_SELECTORS.NAME_INPUT, 'ValidRouteName');
+    fillInput(ROUTE_SELECTORS.PATH_INPUT, '/validpath');
+    // Select GET method
+    selectMultiselectItems(() => cy.contains('div', 'Select methods'), ['GET']);
+    
+    // Fill invalid host with Chinese characters
+    fillInput(ROUTE_SELECTORS.HOST_INPUT, '主机.com');
+    
+    clickWhenEnabled(ROUTE_SELECTORS.SUBMIT_BUTTON);
+    
+    // Verify URL did not navigate away
+    cy.url().should('include', '/routes/create');
+    
+    // Verify error message
+    cy.contains('p', ROUTE_CREATION_ERRORS.INVALID_HOST_HOSTNAME('主机.com'))
+      .scrollIntoView()
+      .should('be.visible');
   });
 });
 
