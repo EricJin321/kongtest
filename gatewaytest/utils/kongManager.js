@@ -72,17 +72,17 @@ class KongManager {
     // Fill Full Url
     cy.log(`Filling Full Url: ${fullUrl}`);
     writeLog(`Filling Full Url: ${fullUrl}`, 'DEBUG');
-    fillInput(SERVICE_SELECTORS.URL_INPUT, fullUrl, { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, fullUrl);
 
     // Optionally fill Name
     if (requestedName) {
       cy.log(`Filling Name: ${requestedName}`);
       writeLog(`Filling Name: ${requestedName}`, 'DEBUG');
-      fillInput(SERVICE_SELECTORS.NAME_INPUT, requestedName, { scroll: false });
+      fillInput(SERVICE_SELECTORS.NAME_INPUT, requestedName);
     }
 
     // Submit form
-    clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
+    clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON);
     cy.log('Save clicked - waiting for redirect to service detail');
 
     // Wait specifically for a UUID-like GUID in the URL path to avoid matching '/create'

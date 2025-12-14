@@ -41,9 +41,9 @@ describe('Sidebar Navigation Verification', () => {
     cy.url().should('include', URL_PATHS.SERVICES_CREATE);
 
     // Fill form and save
-    fillInput(SERVICE_SELECTORS.URL_INPUT, Cypress.env('mockServerHttp'), { scroll: false });
-    fillInput(SERVICE_SELECTORS.NAME_INPUT, 'JumpTestService', { scroll: false });
-    clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, Cypress.env('mockServerHttp'));
+    fillInput(SERVICE_SELECTORS.NAME_INPUT, 'JumpTestService');
+    clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON);
 
     // Verify redirect to service detail (UUID pattern)
     cy.url({ timeout: Cypress.env('saveOperationTimeout') }).should('match', URL_PATTERNS.SERVICE_DETAIL_GUID);

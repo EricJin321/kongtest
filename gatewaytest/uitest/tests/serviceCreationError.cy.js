@@ -26,7 +26,7 @@ describe('Service Creation Error Handling', () => {
 
     cy.wrap(validUrls).each((url) => {
       cy.log(`Testing valid URL: ${url}`);
-      fillInput(SERVICE_SELECTORS.URL_INPUT, url, { scroll: false });
+      fillInput(SERVICE_SELECTORS.URL_INPUT, url);
       // Verify NO error message appears
       cy.get('.help-text').should('not.be.visible');
       cy.get(SERVICE_SELECTORS.URL_INPUT).clear();
@@ -53,7 +53,7 @@ describe('Service Creation Error Handling', () => {
 
     cy.wrap(invalidUrls).each((testCase) => {
       cy.log(`Testing invalid URL: ${testCase.description} - ${testCase.url}`);
-      fillInput(SERVICE_SELECTORS.URL_INPUT, testCase.url, { scroll: false });
+      fillInput(SERVICE_SELECTORS.URL_INPUT, testCase.url);
       // Verify error message appears
       cy.contains('.help-text', SERVICE_CREATION_ERRORS.INVALID_URL)
         .should('be.visible');
@@ -69,7 +69,7 @@ describe('Service Creation Error Handling', () => {
       .click();
 
     // Leave Host empty and fill Port with invalid value (65536)
-    fillInput(SERVICE_SELECTORS.PORT_INPUT, '65536', { scroll: true });
+    fillInput(SERVICE_SELECTORS.PORT_INPUT, '65536');
 
     // Verify both error messages appear
     cy.contains('.help-text', SERVICE_CREATION_ERRORS.INVALID_HOST_EMPTY)
@@ -81,7 +81,7 @@ describe('Service Creation Error Handling', () => {
   });
 
   it('should show error for invalid Name (MyService$$)', () => {
-    fillInput(SERVICE_SELECTORS.NAME_INPUT, 'MyService$$', { scroll: true });
+    fillInput(SERVICE_SELECTORS.NAME_INPUT, 'MyService$$');
     cy.contains('.help-text', SERVICE_CREATION_ERRORS.INVALID_NAME)
       .should('be.visible');
 
@@ -96,7 +96,7 @@ describe('Service Creation with Schema Violation URLs', () => {
   });
 
   it('should show error for invalid Retries (32768)', () => {
-    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://localhost:1080/', { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://localhost:1080/');
     // Click "View advanced fields"
     cy.get(SERVICE_SELECTORS.COLLAPSE_TRIGGER_CONTENT)
       .contains('View advanced fields')
@@ -104,10 +104,10 @@ describe('Service Creation with Schema Violation URLs', () => {
       .click();
     
     // Fill Retries with 32768 (exceeds maximum)
-    fillInput(SERVICE_SELECTORS.RETRIES_INPUT, '32768', { scroll: true });
+    fillInput(SERVICE_SELECTORS.RETRIES_INPUT, '32768');
     
     // Click Save
-    clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
+    clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON);
     
     // Verify URL did not navigate away (still on create page)
     cy.url().should('include', URL_PATHS.SERVICES_CREATE);
@@ -119,7 +119,7 @@ describe('Service Creation with Schema Violation URLs', () => {
   });
 
   it('should show error for invalid Connection Timeout (0)', () => {
-    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://localhost:1080/', { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://localhost:1080/');
     // Click "View advanced fields"
     cy.get(SERVICE_SELECTORS.COLLAPSE_TRIGGER_CONTENT)
       .contains('View advanced fields')
@@ -127,7 +127,7 @@ describe('Service Creation with Schema Violation URLs', () => {
       .click();
     
     // Fill Connection Timeout with 0
-    fillInput(SERVICE_SELECTORS.CONN_TIMEOUT_INPUT, '0', { scroll: true });
+    fillInput(SERVICE_SELECTORS.CONN_TIMEOUT_INPUT, '0');
     
     // Click Save
     clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
@@ -165,7 +165,7 @@ describe('Service Creation with Schema Violation URLs', () => {
   });
 
   it('should show error for invalid Read Timeout (0)', () => {
-    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://localhost:1080/', { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://localhost:1080/');
     // Click "View advanced fields"
     cy.get(SERVICE_SELECTORS.COLLAPSE_TRIGGER_CONTENT)
       .contains('View advanced fields')
@@ -173,7 +173,7 @@ describe('Service Creation with Schema Violation URLs', () => {
       .click();
     
     // Fill Read Timeout with 0
-    fillInput(SERVICE_SELECTORS.READ_TIMEOUT_INPUT, '0', { scroll: true });
+    fillInput(SERVICE_SELECTORS.READ_TIMEOUT_INPUT, '0');
     
     // Click Save
     clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
@@ -188,7 +188,7 @@ describe('Service Creation with Schema Violation URLs', () => {
   });
 
   it('should show error for invalid Connection Timeout (2147483647)', () => {
-    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://localhost:1080/', { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://localhost:1080/');
     // Click "View advanced fields"
     cy.get(SERVICE_SELECTORS.COLLAPSE_TRIGGER_CONTENT)
       .contains('View advanced fields')
@@ -196,7 +196,7 @@ describe('Service Creation with Schema Violation URLs', () => {
       .click();
     
     // Fill Connection Timeout with 2147483647 (exceeds maximum)
-    fillInput(SERVICE_SELECTORS.CONN_TIMEOUT_INPUT, '2147483647', { scroll: true });
+    fillInput(SERVICE_SELECTORS.CONN_TIMEOUT_INPUT, '2147483647');
     
     // Click Save
     clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
@@ -211,7 +211,7 @@ describe('Service Creation with Schema Violation URLs', () => {
   });
 
   it('should show error for invalid Write Timeout (2147483647)', () => {
-    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://localhost:1080/', { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://localhost:1080/');
     // Click "View advanced fields"
     cy.get(SERVICE_SELECTORS.COLLAPSE_TRIGGER_CONTENT)
       .contains('View advanced fields')
@@ -219,7 +219,7 @@ describe('Service Creation with Schema Violation URLs', () => {
       .click();
     
     // Fill Write Timeout with 2147483647 (exceeds maximum)
-    fillInput(SERVICE_SELECTORS.WRITE_TIMEOUT_INPUT, '2147483647', { scroll: true });
+    fillInput(SERVICE_SELECTORS.WRITE_TIMEOUT_INPUT, '2147483647');
     
     // Click Save
     clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
@@ -234,7 +234,7 @@ describe('Service Creation with Schema Violation URLs', () => {
   });
 
   it('should show error for invalid Read Timeout (2147483647)', () => {
-    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://localhost:1080/', { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://localhost:1080/');
     // Click "View advanced fields"
     cy.get(SERVICE_SELECTORS.COLLAPSE_TRIGGER_CONTENT)
       .contains('View advanced fields')
@@ -242,7 +242,7 @@ describe('Service Creation with Schema Violation URLs', () => {
       .click();
     
     // Fill Read Timeout with 2147483647 (exceeds maximum)
-    fillInput(SERVICE_SELECTORS.READ_TIMEOUT_INPUT, '2147483647', { scroll: true });
+    fillInput(SERVICE_SELECTORS.READ_TIMEOUT_INPUT, '2147483647');
     
     // Click Save
     clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
@@ -257,7 +257,7 @@ describe('Service Creation with Schema Violation URLs', () => {
   });
 
   it('should reject URL with incomplete IP address and show schema violation error', () => {
-    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://1.1.1', { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://1.1.1');
     clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
     
     // Verify URL did not navigate away (still on create page)
@@ -270,7 +270,7 @@ describe('Service Creation with Schema Violation URLs', () => {
   });
 
   it('should reject URL with unencoded spaces in path and show schema violation error', () => {
-    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://abc/path with spaces', { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://abc/path with spaces');
     clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
     
     // Verify URL did not navigate away (still on create page)
@@ -283,7 +283,7 @@ describe('Service Creation with Schema Violation URLs', () => {
   });
 
   it('should reject URL with invalid characters in query and show schema violation error', () => {
-    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://abc?query=<script>', { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://abc?query=<script>');
     clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
     
     // Verify URL did not navigate away (still on create page)
@@ -296,7 +296,7 @@ describe('Service Creation with Schema Violation URLs', () => {
   });
 
   it('should reject URL with unencoded quote in path and show schema violation error', () => {
-    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://abc/path"quote', { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://abc/path"quote');
     clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
     
     // Verify URL did not navigate away (still on create page)
@@ -309,7 +309,7 @@ describe('Service Creation with Schema Violation URLs', () => {
   });
 
   it('should show error for Client certificate with HTTP protocol', () => {
-    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://abc', { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://abc');
     // Click "View advanced fields"
     cy.get(SERVICE_SELECTORS.COLLAPSE_TRIGGER_CONTENT)
       .contains('View advanced fields')
@@ -317,7 +317,7 @@ describe('Service Creation with Schema Violation URLs', () => {
       .click();
     
     // Fill Client certificate with a UUID
-    fillInput(SERVICE_SELECTORS.CLIENT_CERT_INPUT, '550e8400-e29b-41d4-a716-446655440000', { scroll: true });
+    fillInput(SERVICE_SELECTORS.CLIENT_CERT_INPUT, '550e8400-e29b-41d4-a716-446655440000');
     
     // Click Save
     clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
@@ -332,7 +332,7 @@ describe('Service Creation with Schema Violation URLs', () => {
   });
 
   it('should show error for CA certificates with HTTP protocol', () => {
-    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://abc', { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, 'http://abc');
     // Click "View advanced fields"
     cy.get(SERVICE_SELECTORS.COLLAPSE_TRIGGER_CONTENT)
       .contains('View advanced fields')
@@ -340,7 +340,7 @@ describe('Service Creation with Schema Violation URLs', () => {
       .click();
     
     // Fill CA certificates with a UUID
-    fillInput(SERVICE_SELECTORS.CA_CERTS_INPUT, '550e8400-e29b-41d4-a716-446655440001', { scroll: true });
+    fillInput(SERVICE_SELECTORS.CA_CERTS_INPUT, '550e8400-e29b-41d4-a716-446655440001');
     
     // Click Save
     clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
@@ -355,7 +355,7 @@ describe('Service Creation with Schema Violation URLs', () => {
   });
 
   it('should show error for invalid Client certificate UUID format', () => {
-    fillInput(SERVICE_SELECTORS.URL_INPUT, 'https://abc', { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, 'https://abc');
     // Click "View advanced fields"
     cy.get(SERVICE_SELECTORS.COLLAPSE_TRIGGER_CONTENT)
       .contains('View advanced fields')
@@ -363,7 +363,7 @@ describe('Service Creation with Schema Violation URLs', () => {
       .click();
     
     // Fill Client certificate with invalid UUID
-    fillInput(SERVICE_SELECTORS.CLIENT_CERT_INPUT, 'edf', { scroll: true });
+    fillInput(SERVICE_SELECTORS.CLIENT_CERT_INPUT, 'edf');
     
     // Click Save
     clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
@@ -378,7 +378,7 @@ describe('Service Creation with Schema Violation URLs', () => {
   });
 
   it('should show error for invalid CA certificates UUID format', () => {
-    fillInput(SERVICE_SELECTORS.URL_INPUT, 'https://abc', { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, 'https://abc');
     // Click "View advanced fields"
     cy.get(SERVICE_SELECTORS.COLLAPSE_TRIGGER_CONTENT)
       .contains('View advanced fields')
@@ -386,7 +386,7 @@ describe('Service Creation with Schema Violation URLs', () => {
       .click();
     
     // Fill CA certificates with invalid UUID
-    fillInput(SERVICE_SELECTORS.CA_CERTS_INPUT, 'edf', { scroll: true });
+    fillInput(SERVICE_SELECTORS.CA_CERTS_INPUT, 'edf');
     
     // Click Save
     clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
@@ -420,8 +420,8 @@ describe('Duplicate Service Name Test', () => {
   });
 
   it('should fail when creating a service with an existing name', () => {
-    fillInput(SERVICE_SELECTORS.URL_INPUT, Cypress.env('mockServerHttp'), { scroll: false });
-    fillInput(SERVICE_SELECTORS.NAME_INPUT, serviceName, { scroll: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, Cypress.env('mockServerHttp'));
+    fillInput(SERVICE_SELECTORS.NAME_INPUT, serviceName);
     
     clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON, { force: false });
     

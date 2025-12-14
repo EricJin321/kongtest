@@ -24,37 +24,25 @@ export const Config = {
 
 /**
  * Fill an input field with a value.
- * Ensures visibility, optionally scrolls into view, selects all existing content, and types new value.
+ * Ensures visibility, scrolls into view, selects all existing content, and types new value.
  * Using selectAll before typing ensures the new value replaces any auto-filled default values.
  * 
  * @param {string} selector - CSS selector for the input element
  * @param {string} value - Value to type into the input
  * @param {object} opts - Options
  * @param {number} opts.timeout - Timeout in ms (default: 10000)
- * @param {boolean} opts.clear - Whether to select all content first (default: true)
- * @param {boolean} opts.scroll - Whether to scroll into view first (default: true)
  * @returns {Cypress.Chainable}
  */
 export function fillInput(selector, value, opts = {}) {
-  const { timeout = TIMEOUTS.DEFAULT, clear = true, scroll = true } = opts;
+  const { timeout = TIMEOUTS.DEFAULT } = opts;
   
-  return cy.get(selector, { timeout }).then(($el) => {
-    let chain = cy.wrap($el);
-    
-    if (scroll) {
-      chain = chain.scrollIntoView();
-    }
-    
-    chain = chain.should('be.visible');
-    
-    if (clear) {
-      // Use {selectall} to select existing content, then type to replace it
-      // This handles inputs that auto-fill default values after clearing
-      chain = chain.type('{selectall}');
-    }
-    
-    return chain.type(value);
-  });
+  // Use {selectall} to select existing content, then type to replace it
+  // This handles inputs that auto-fill default values after clearing
+  return cy.get(selector, { timeout })
+    .scrollIntoView()
+    .should('be.visible')
+    .type('{selectall}')
+    .type(value);
 }
 
 /**
@@ -63,29 +51,15 @@ export function fillInput(selector, value, opts = {}) {
  * @param {string} selector - CSS selector for the element
  * @param {object} opts - Options
  * @param {number} opts.timeout - Timeout in ms (default: 10000)
- * @param {boolean} opts.scroll - Whether to scroll into view first (default: true)
- * @param {boolean} opts.checkEnabled - Whether to check enabled state (default: true)
- * @param {boolean} opts.force - Whether to force click (default: true)
  * @returns {Cypress.Chainable}
  */
 export function clickWhenEnabled(selector, opts = {}) {
-  const { timeout = TIMEOUTS.DEFAULT, scroll = true, checkEnabled = true, force = false } = opts;
-  
-  return cy.get(selector, { timeout }).then(($el) => {
-    let chain = cy.wrap($el);
-    
-    if (scroll) {
-      chain = chain.scrollIntoView();
-    }
-    
-    chain = chain.should('be.visible');
-    
-    if (checkEnabled) {
-      chain = chain.should('be.enabled');
-    }
-    
-    return chain.click({ force });
-  });
+  const { timeout = TIMEOUTS.DEFAULT } = opts;
+  return cy.get(selector, { timeout })
+    .scrollIntoView()
+    .should('be.visible')
+    .should('be.enabled')
+    .click();
 }
 
 /**
