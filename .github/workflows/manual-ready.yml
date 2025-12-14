@@ -73,12 +73,18 @@ jobs:
         run: |
           npm ci
 
-      - name: Run comprehensive Cypress tests
+      - name: Run Cypress tests (excluding tooltip tests for Firefox)
         working-directory: gatewaytest
         env:
           CI: true
         run: |
-          npx cross-env TEST_SET=all npx cypress run --browser ${{ inputs.browser }}
+          if [ "${{ inputs.browser }}" = "firefox" ]; then
+            # Firefox: exclude tooltip interaction tests (uses cypress-real-events which requires CDP)
+            npx cross-env TEST_SET=all-firefox npx cypress run --browser firefox
+          else
+            # Chrome/Edge: run all tests
+            npx cross-env TEST_SET=all npx cypress run --browser ${{ inputs.browser }}
+          fi
 
       - name: Upload Cypress logs
         if: always()
