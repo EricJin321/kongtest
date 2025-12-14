@@ -1,24 +1,30 @@
+/**
+ * @fileoverview Service and route list verification tests
+ * @description Tests that created services and routes appear correctly in their
+ * respective list pages with proper table rendering and data visibility.
+ */
+
 import KongManager from '../../utils/kongManager.js';
 import { writeLog } from '../../utils/logger.js';
 import { findRowByName } from '../../utils/uiHelpers.js';
+import { TABLE_SELECTORS, URL_PATHS } from '../../utils/constants.js';
 
 describe('Service List Verification', () => {
   const serviceName = 'ListVerifyService';
 
   before(() => {
     // Create service
-    return KongManager.createService('http://mockserver:1080', { name: serviceName });
+    return KongManager.createService(Cypress.env('mockServerHttp'), { name: serviceName });
   });
 
   it('should display the created service in the service list', () => {
     writeLog('Starting service list verification');
-    cy.visit('http://localhost:8002/default/services');
+    cy.visit(`${Cypress.env('kongManagerUrl')}${URL_PATHS.SERVICES}`);
     
     // Verify service name exists in the list using specific table row lookup
-    findRowByName('table[data-tableid], table', serviceName).then(($row) => {
-      expect($row, `Row for service ${serviceName}`).to.not.be.undefined;
-      cy.wrap($row).should('be.visible');
-    });
+    findRowByName(TABLE_SELECTORS.TABLE, serviceName)
+      .should('not.be.null')
+      .and('be.visible');
     writeLog('Service found in list');
   });
 
@@ -33,20 +39,19 @@ describe('Route List Verification', () => {
 
   before(() => {
     // Create service and route
-    return KongManager.createService('http://mockserver:1080', { name: serviceName }).then((id) => {
+    return KongManager.createService(Cypress.env('mockServerHttp'), { name: serviceName }).then((id) => {
       return KongManager.createRoute(id, { name: routeName, path: '/listverify' });
     });
   });
 
   it('should display the created route in the route list', () => {
     writeLog('Starting route list verification');
-    cy.visit('http://localhost:8002/default/routes');
+    cy.visit(`${Cypress.env('kongManagerUrl')}${URL_PATHS.ROUTES}`);
     
     // Verify route name exists in the list using specific table row lookup
-    findRowByName('table[data-tableid], table', routeName).then(($row) => {
-      expect($row, `Row for route ${routeName}`).to.not.be.undefined;
-      cy.wrap($row).should('be.visible');
-    });
+    findRowByName(TABLE_SELECTORS.TABLE, routeName)
+      .should('not.be.null')
+      .and('be.visible');
     writeLog('Route found in list');
   });
 

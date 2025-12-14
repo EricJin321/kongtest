@@ -1,5 +1,11 @@
-import ServiceWebApi from '../utils/servicewebapi';
-import KongManager from '../../utils/kongManager';
+/**
+ * @fileoverview HTTP method restriction tests for Kong Gateway
+ * @description Tests that Kong correctly enforces HTTP method restrictions on routes.
+ * Verifies that requests with non-allowed methods return 404 Not Found.
+ */
+
+import ServiceWebApi from '../utils/servicewebapi.js';
+import KongManager from '../../utils/kongManager.js';
 
 describe('Method Not Supported API Tests', () => {
   // Top-level known service name constant (module-scoped)
@@ -9,12 +15,9 @@ describe('Method Not Supported API Tests', () => {
 
   before(() => {
     // Create a service in Kong Manager via UI
-    return KongManager.createService('http://mockserver:1080', { name: testService }).then((id) => {
-      // Create a Route for the newly created service - only GET method is allowed
-      return KongManager.createRoute(id, { name: testRouteName, path: testRoutePath, methods: ['GET'] });
-    })
-    // Wait according to configured propagation time (in endpoints.json)
-    .then(() => cy.fixture('config/endpoints.json').then(cfg => cy.wait(cfg.servicePropagationWaitMs || 8000)));
+    return KongManager.createService(Cypress.env('mockServerHttp'), { name: testService })
+      .then((id) => KongManager.createRoute(id, { name: testRouteName, path: testRoutePath, methods: ['GET'] }))
+      .then(() => cy.wait(Cypress.env('servicePropagationWaitMs')));
   });
 
   beforeEach(() => {
@@ -60,9 +63,9 @@ describe('Method Not Supported API Tests', () => {
     const postOnlyPath = '/postonly';
 
     before(() => {
-      return KongManager.createService('http://mockserver:1080', { name: postOnlyService })
+      return KongManager.createService(Cypress.env('mockServerHttp'), { name: postOnlyService })
         .then((id) => KongManager.createRoute(id, { name: postOnlyRoute, path: postOnlyPath, methods: ['POST'] }))
-        .then(() => cy.fixture('config/endpoints.json').then(cfg => cy.wait(cfg.servicePropagationWaitMs || 8000)));
+        .then(() => cy.wait(Cypress.env('servicePropagationWaitMs')));
     });
 
     after(() => {

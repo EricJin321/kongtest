@@ -1,10 +1,20 @@
-name: Linux Kong Test All
+name: Linux Kong Test CI
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: 'Browser to run tests'
+        required: true
+        default: 'chrome'
+        type: choice
+        options:
+          - chrome
+          - edge
+          - firefox
 
 jobs:
-  linux-comprehensive:
+  kong-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -15,7 +25,7 @@ jobs:
           echo "Workspace files:" 
           ls -la
 
-      - name: Setup Node.js (optional)
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -62,25 +72,32 @@ jobs:
         run: |
           npm ci
 
-      - name: Run comprehensive Cypress tests
+      - name: Run Cypress tests (excluding tooltip tests for Firefox)
         working-directory: gatewaytest
         env:
           CI: true
         run: |
-          npx cross-env TEST_SET=all npx cypress run
+          if [ "${{ inputs.browser }}" = "firefox" ]; then
+            # Firefox: exclude tooltip interaction tests (uses cypress-real-events which requires CDP)
+            npx cross-env TEST_SET=all-firefox npx cypress run --browser firefox
+          else
+            # Chrome/Edge: run all tests
+            npx cross-env TEST_SET=all npx cypress run --browser ${{ inputs.browser }}
+          fi
 
       - name: Upload Cypress logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-logs
+          name: cypress-logs-${{ inputs.browser }}
           path: gatewaytest/cypress/logs
 
       - name: Upload Cypress screenshots and videos
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-artifacts
+          name: cypress-artifacts-${{ inputs.browser }}
           path: |
             gatewaytest/cypress/screenshots
             gatewaytest/cypress/videos
+

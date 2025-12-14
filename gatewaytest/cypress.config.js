@@ -8,13 +8,16 @@ const getSpecPattern = () => {
   const testSet = process.env.TEST_SET || 'all';
   
     const patterns = {
-    all: '{webapitest/tests/{regexMatchTest.cy.js,basicService.cy.js,httpsService.cy.js,noStripPath.cy.js,methodNotSupport.cy.js,httpBlockTest.cy.js},uitest/tests/{serviceCreationError.cy.js,routeCreationError.cy.js,jumpVerification.cy.js,listVerification.cy.js}}',
-    // comprehensive runs basicService, httpsService and noStripPath specs
-    comprehensive: 'webapitest/tests/{regexMatchTest.cy.js,basicService.cy.js,httpsService.cy.js,noStripPath.cy.js,methodNotSupport.cy.js,httpBlockTest.cy.js}',
+    all: '{webapitest/tests/{regexMatchTest.cy.js,basicService.cy.js,httpsService.cy.js,noStripPath.cy.js,methodNotSupport.cy.js,httpBlockTest.cy.js,routeMultiplePath.cy.js},uitest/tests/{serviceCreationError.cy.js,routeCreationError.cy.js,jumpVerification.cy.js,listVerification.cy.js,serviceCreationInteration.cy.js,serviceBoundaryValues.cy.js}}',
+    // all-firefox: all tests except tooltip interaction tests (Firefox doesn't support CDP for cypress-real-events)
+    // TODO: Support tooltip tests on Firefox by implementing alternative hover mechanism (e.g., .trigger('mouseover'))
+    'all-firefox': '{webapitest/tests/{regexMatchTest.cy.js,basicService.cy.js,httpsService.cy.js,noStripPath.cy.js,methodNotSupport.cy.js,httpBlockTest.cy.js,routeMultiplePath.cy.js},uitest/tests/{serviceCreationError.cy.js,routeCreationError.cy.js,jumpVerification.cy.js,listVerification.cy.js,serviceBoundaryValues.cy.js}}',
+    // comprehensive runs all API tests
+    comprehensive: 'webapitest/tests/{regexMatchTest.cy.js,basicService.cy.js,httpsService.cy.js,noStripPath.cy.js,methodNotSupport.cy.js,httpBlockTest.cy.js,routeMultiplePath.cy.js}',
     // basic runs only basicService spec
-    //comprehensive: 'webapitest/tests/httpBlockTest.js',
+    test: 'webapitest/tests/routeMultiplePath.cy.js',
     basic: 'webapitest/tests/basicService.cy.js',
-    ui: 'uitest/tests/{serviceCreationError.cy.js,routeCreationError.cy.js,jumpVerification.cy.js,listVerification.cy.js}',
+    ui: 'uitest/tests/{serviceCreationError.cy.js,routeCreationError.cy.js,jumpVerification.cy.js,listVerification.cy.js,serviceCreationInteration.cy.js,serviceBoundaryValues.cy.js}',
   };
 
   return patterns[testSet] || patterns['all'];
@@ -53,8 +56,26 @@ module.exports = defineConfig({
     supportFile: 'webapitest/support.js',
     
     setupNodeEvents(on, config) {
+      // Load test configuration from endpoints.json and inject into Cypress.env
+      const endpointsConfig = JSON.parse(
+        fs.readFileSync(path.join(__dirname, 'cypress/fixtures/config/endpoints.json'), 'utf8')
+      );
+      
+      // Inject configuration as environment variables
+      config.env = {
+        ...config.env,
+        kongManagerUrl: endpointsConfig.kongManagerUrl,
+        mockServerHttp: endpointsConfig.mockServer.http,
+        mockServerHttps: endpointsConfig.mockServer.https,
+        pageLoadTimeout: endpointsConfig.timeouts.pageLoadTimeout,
+        pageNavigationTimeout: endpointsConfig.timeouts.pageNavigationTimeout,
+        saveOperationTimeout: endpointsConfig.timeouts.saveOperationTimeout,
+        servicePropagationWaitMs: endpointsConfig.servicePropagationWaitMs,
+        logLevel: endpointsConfig.logLevel
+      };
+      
       // Node event handlers / tasks
-        on('task', {
+      on('task', {
         writeLog(message) {
           const logDir = path.join(__dirname, 'cypress/logs');
           const logFile = path.join(logDir, 'test.log');
@@ -73,6 +94,9 @@ module.exports = defineConfig({
           }
         }
       });
+      
+      // Return the modified config
+      return config;
     }
   },
 })

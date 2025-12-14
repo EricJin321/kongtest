@@ -2,11 +2,21 @@
 name: Manual Ready CI
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: 'Browser to run tests'
+        required: true
+        default: 'chrome'
+        type: choice
+        options:
+          - chrome
+          - edge
+          - firefox
 
 jobs:
   manual-ready:
-    runs-on: macos-13 # Switch to Intel-based macOS for better virtualization stability
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,32 +33,10 @@ jobs:
 
       - name: Print Node and npm versions
         run: |
-          node -v
-          npm -v
+          node -v || true
+          npm -v || true
 
-      - name: Setup Docker on macOS (Colima)
-        run: |
-          # Install Colima, Docker, Docker Compose, and QEMU
-          brew install colima docker docker-compose qemu
-          
-          # Create docker config directory
-          mkdir -p ~/.docker/cli-plugins
-          
-          # Link docker-compose plugin
-          ln -sfn $(brew --prefix)/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
-          
-          # Start Colima
-          # Using macos-13 (Intel), QEMU is the standard backend.
-          # We add error logging to see why it fails if it does.
-          colima start --cpu 2 --memory 4 || (cat ~/.colima/_lima/colima/ha.stderr.log; exit 1)
-          
-          # Wait for Docker socket to be ready
-          echo "Waiting for Docker socket..."
-          while ! docker info > /dev/null 2>&1; do sleep 1; done
-          
-          # Verify versions
-          docker version
-          docker compose version
+      # Assume runner provides Docker and docker compose; remove explicit install to speed up workflow
 
       - name: Start services with docker-compose
         run: |
@@ -85,25 +73,31 @@ jobs:
         run: |
           npm ci
 
-      - name: Run comprehensive Cypress tests
+      - name: Run Cypress tests (excluding tooltip tests for Firefox)
         working-directory: gatewaytest
         env:
           CI: true
         run: |
-          npx cross-env TEST_SET=comprehensive npx cypress run
+          if [ "${{ inputs.browser }}" = "firefox" ]; then
+            # Firefox: exclude tooltip interaction tests (uses cypress-real-events which requires CDP)
+            npx cross-env TEST_SET=all-firefox npx cypress run --browser firefox
+          else
+            # Chrome/Edge: run all tests
+            npx cross-env TEST_SET=all npx cypress run --browser ${{ inputs.browser }}
+          fi
 
       - name: Upload Cypress logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-logs
+          name: cypress-logs-${{ inputs.browser }}
           path: gatewaytest/cypress/logs
 
       - name: Upload Cypress screenshots and videos
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-artifacts
+          name: cypress-artifacts-${{ inputs.browser }}
           path: |
             gatewaytest/cypress/screenshots
             gatewaytest/cypress/videos

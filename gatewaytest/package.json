@@ -9,11 +9,13 @@
     "test:basic": "cross-env TEST_SET=basic cypress run",
     "test:comprehensive": "cross-env TEST_SET=comprehensive cypress run",
     "test:ui": "cross-env TEST_SET=ui cypress run",
+    "test:test": "cross-env TEST_SET=test cypress run",
     "test:staging": "cross-env ENVIRONMENT=staging TEST_SET=all cypress run",
     "test:prod": "cross-env ENVIRONMENT=production TEST_SET=all cypress run",
     "test:timeout:10s": "cross-env TIMEOUT=10000 cypress run",
     "cypress:open": "cypress open"
+  },
+  "dependencies": {
+    "cypress-real-events": "^1.15.0"
   }
 }
-
-

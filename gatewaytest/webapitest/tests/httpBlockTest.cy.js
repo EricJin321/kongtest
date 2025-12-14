@@ -1,5 +1,11 @@
-import ServiceWebApi from '../utils/servicewebapi';
-import KongManager from '../../utils/kongManager';
+/**
+ * @fileoverview Protocol restriction tests for Kong Gateway
+ * @description Tests Kong's protocol enforcement (HTTP/HTTPS) and redirect behavior.
+ * Verifies that HTTPS-only routes reject HTTP requests or redirect with appropriate status codes.
+ */
+
+import ServiceWebApi from '../utils/servicewebapi.js';
+import KongManager from '../../utils/kongManager.js';
 
 describe('HTTP Block Test API Tests', () => {
   // Top-level known service name constant (module-scoped)
@@ -9,17 +15,14 @@ describe('HTTP Block Test API Tests', () => {
 
   before(() => {
     // Create a service in Kong Manager via UI
-    return KongManager.createService('http://mockserver:1080', { name: testService }).then((id) => {
-      // Create a Route that only accepts HTTPS protocol
-      return KongManager.createRoute(id, { 
+    return KongManager.createService(Cypress.env('mockServerHttp'), { name: testService })
+      .then((id) => KongManager.createRoute(id, { 
         name: testRouteName, 
         path: testRoutePath, 
         methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS','HEAD'],
         protocols: 'HTTPS'
-      });
-    })
-    // Wait according to configured propagation time (in endpoints.json)
-    .then(() => cy.fixture('config/endpoints.json').then(cfg => cy.wait(cfg.servicePropagationWaitMs || 8000)));
+      }))
+      .then(() => cy.wait(Cypress.env('servicePropagationWaitMs')));
   });
 
   beforeEach(() => {
@@ -48,7 +51,7 @@ describe('HTTPS Redirect Code 302 Test', () => {
   const redirectPath = '/redirecttest';
 
   before(() => {
-    return KongManager.createService('http://mockserver:1080', { name: redirectService })
+    return KongManager.createService(Cypress.env('mockServerHttp'), { name: redirectService })
       .then((id) => KongManager.createRoute(id, {
         name: redirectRoute,
         path: redirectPath,
@@ -56,7 +59,7 @@ describe('HTTPS Redirect Code 302 Test', () => {
         protocols: 'HTTPS',
         httpRedirectCode: 302
       }))
-      .then(() => cy.fixture('config/endpoints.json').then(cfg => cy.wait(cfg.servicePropagationWaitMs || 8000)));
+      .then(() => cy.wait(Cypress.env('servicePropagationWaitMs')));
   });
 
   after(() => {

@@ -1,5 +1,11 @@
-import ServiceWebApi from '../utils/servicewebapi';
-import KongManager from '../../utils/kongManager';
+/**
+ * @fileoverview Basic service API tests for Kong Gateway
+ * @description Tests basic HTTP operations (GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD)
+ * through a Kong service/route with standard configuration.
+ */
+
+import ServiceWebApi from '../utils/servicewebapi.js';
+import KongManager from '../../utils/kongManager.js';
 
 describe('BasicTestService API Tests', () => {
   // Top-level known service name constant (module-scoped)
@@ -9,12 +15,9 @@ describe('BasicTestService API Tests', () => {
 
   before(() => {
     // Create a service in Kong Manager via UI
-    return KongManager.createService('http://mockserver:1080', { name: basicTestService }).then((id) => {
-      // Create a Route for the newly created service using KongManager helper
-      return KongManager.createRoute(id, { name: basicRouteName, path: basicRoutePath, methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS','HEAD'] });
-    })
-    // Wait according to configured propagation time (in endpoints.json)
-    .then(() => cy.fixture('config/endpoints.json').then(cfg => cy.wait(cfg.servicePropagationWaitMs || 8000)));
+    return KongManager.createService(Cypress.env('mockServerHttp'), { name: basicTestService })
+      .then((id) => KongManager.createRoute(id, { name: basicRouteName, path: basicRoutePath, methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS','HEAD'] }))
+      .then(() => cy.wait(Cypress.env('servicePropagationWaitMs')));
   });
 
   beforeEach(() => {

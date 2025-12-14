@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Debug test for service and route creation
+ * @description Minimal test to verify KongManager service/route creation flow.
+ */
+
 import KongManager from '../../../utils/kongManager.js';
 import { writeLog } from '../../../utils/logger.js';
 
@@ -6,7 +11,7 @@ describe('Comprehensive API Tests', () => {
 
   before(() => {
     // Create service and route (debug)
-    return KongManager.createService('http://mockserver:1080', { name: basicTestService }).then((id) => {
+    return KongManager.createService(Cypress.env('mockServerHttp'), { name: basicTestService }).then((id) => {
       return KongManager.createRoute(id, { name: 'BasicRoute', path: '/testbasic', methods: ['GET','PUT'] });
     });
   });

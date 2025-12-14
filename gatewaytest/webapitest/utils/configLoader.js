@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Configuration loader for API tests
+ * @description Provides runtime access to test configuration including base URLs
+ * and endpoint construction for API requests.
+ */
+
 import { buildBaseUrl } from './configHelper.js';
 
 /**

@@ -1,4 +1,11 @@
+/**
+ * @fileoverview Kong Manager UI navigation tests
+ * @description Tests navigation flows between different pages in Kong Manager,
+ * including sidebar navigation and page redirects after creating services/routes.
+ */
+
 import { fillInput, clickWhenEnabled, clickSidebarItem } from '../../utils/uiHelpers.js';
+import { SERVICE_SELECTORS, ROUTE_SELECTORS, URL_PATHS, URL_PATTERNS } from '../../utils/constants.js';
 import KongManager from '../../utils/kongManager.js';
 
 describe('Sidebar Navigation Verification', () => {
@@ -8,23 +15,22 @@ describe('Sidebar Navigation Verification', () => {
   });
 
   it('should navigate to Gateway Services and Routes pages', () => {
-    cy.visit('http://localhost:8002/default/overview');
+    cy.visit(`${Cypress.env('kongManagerUrl')}${URL_PATHS.OVERVIEW}`);
 
     // Click Gateway Services
     clickSidebarItem('Gateway Services');
-    cy.url().should('eq', 'http://localhost:8002/default/services');
+    cy.url().should('eq', `${Cypress.env('kongManagerUrl')}${URL_PATHS.SERVICES}`);
 
     // Click Routes
     clickSidebarItem('Routes');
-    cy.url().should('eq', 'http://localhost:8002/default/routes');
+    cy.url().should('eq', `${Cypress.env('kongManagerUrl')}${URL_PATHS.ROUTES}`);
   });
 
   it('should navigate to Create Service page and verify creation redirect', () => {
-    cy.visit('http://localhost:8002/default/services');
+    cy.visit(`${Cypress.env('kongManagerUrl')}${URL_PATHS.SERVICES}`);
 
     // Use the same selector logic as KongManager.createService
-    const createServiceSelector = 'a[data-testid="toolbar-add-gateway-service"], a[data-testid="empty-state-action"], a.k-button.medium.primary[href="/default/services/create"]';
-    cy.get(createServiceSelector, { timeout: 10000 })
+    cy.get(SERVICE_SELECTORS.CREATE_SERVICE_BUTTON, { timeout: Cypress.env('pageLoadTimeout') })
       .should(($els) => {
         expect($els.filter(':visible').length).to.be.gt(0, 'Expected create service button to be visible');
       })
@@ -32,23 +38,25 @@ describe('Sidebar Navigation Verification', () => {
       .first()
       .click({ force: true });
 
-    cy.url().should('include', '/default/services/create');
+    cy.url().should('include', URL_PATHS.SERVICES_CREATE);
 
     // Fill form and save
-    fillInput('[data-testid="gateway-service-url-input"]', 'http://mockserver:1080', { scroll: false });
-    fillInput('[data-testid="gateway-service-name-input"]', 'JumpTestService', { scroll: false });
-    clickWhenEnabled('[data-testid="service-create-form-submit"]', { force: false });
+    fillInput(SERVICE_SELECTORS.URL_INPUT, Cypress.env('mockServerHttp'));
+    fillInput(SERVICE_SELECTORS.NAME_INPUT, 'JumpTestService');
+    clickWhenEnabled(SERVICE_SELECTORS.SUBMIT_BUTTON);
 
     // Verify redirect to service detail (UUID pattern)
-    const guidPathRegex = /\/default\/services\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-    cy.url({ timeout: 30000 }).should('match', guidPathRegex);
+    cy.url({ timeout: Cypress.env('saveOperationTimeout') }).should('match', URL_PATTERNS.SERVICE_DETAIL_GUID);
   });
 
   it('should navigate to Create Route page from Routes list', () => {
-    cy.visit('http://localhost:8002/default/routes');
+    cy.visit(`${Cypress.env('kongManagerUrl')}${URL_PATHS.ROUTES}`);
 
-    cy.get('a[data-testid="empty-state-action"], a[href="/default/routes/create"]').first().click({ force: true });
+    cy.get(ROUTE_SELECTORS.EMPTY_STATE_ACTION)
+      .first()
+      .should('be.visible')
+      .click();
 
-    cy.url().should('include', '/default/routes/create');
+    cy.url().should('include', URL_PATHS.ROUTES_CREATE);
   });
 });

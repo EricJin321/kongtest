@@ -1,4 +1,9 @@
-import ServiceWebApi from '../utils/servicewebapi';
+/**
+ * @fileoverview Debug test for basic API operations
+ * @description Minimal test suite for debugging API request/response behavior.
+ */
+
+import ServiceWebApi from '../../utils/servicewebapi.js';
 import { writeLog } from '../../../utils/logger.js';
 
 describe('Basic API Tests', function () {
